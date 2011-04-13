@@ -405,8 +405,8 @@ public class Main {
 		// contigue(10);
 		//random(10);
 		// cokeAndPut(10);
-		// getMeIMFamous(10);
-		leaveMyAss(5);
+		//getMeIMFamous(10);
+		//leaveMyAss(5);
 
 		/*
 		 * InetSocketAddress nodeAddr[] = new InetSocketAddress[NB_NODES + 1];

@@ -1,6 +1,7 @@
 package dht;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import dht.Range.Data;
@@ -239,7 +240,8 @@ public class Node implements INode, Runnable {
 
 	private void route(MessagePing msg) {
 
-		Iterator<Entry<Long, Object>> iter = range.iterator();
+		Map<Long, Object> data = range.getData();
+		Iterator<Entry<Long, Object>> iter = data.entrySet().iterator();
 		String out = "";
 
 		while (iter.hasNext()) {
