@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import psar.Range.Data;
 
-// TODO com
+// TODO com
 /**
  * Implémentation concrète d'un noeud de l'application.
  */
@@ -27,6 +27,7 @@ public class Node implements INode, Runnable {
 	private Range range;
 
 	/**
+   *
 	 * Crée et intialise un noeud déconnecté de tout voisin.
 	 * 
 	 * @param inetwork
