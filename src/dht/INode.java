@@ -8,15 +8,13 @@ public interface INode {
 	/**
 	 * Retorune l'identifiant du noeud.
 	 */
-	long getId();
+	UInt getId();
 
-	Range getRange();
-
-	/*
-	 * Range getRange();
-	 * 
-	 * INetwork getNetwork();
-	 * 
-	 * int getNext();
-	 */
+	void ping();
+	
+	void put(Object data, UInt key);
+	
+	void leave();
+	
+	public void get(UInt key);
 }

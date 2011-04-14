@@ -1,5 +1,7 @@
 package dht.message;
 
+import dht.UInt;
+
 /**
  * Message envoyé à une <code>INode</code> pour lui indiquer la fin de sa
  * nouvelle plage de données. Ce message est utilisé lorsqu'une
@@ -10,7 +12,7 @@ package dht.message;
 public class MessageEndRange extends AMessage {
 
 	private static final long serialVersionUID = 1L;
-	private long end;
+	private UInt end;
 
 	/**
 	 * Crée et initialise un message transmettant la fin de plage pour une
@@ -22,7 +24,7 @@ public class MessageEndRange extends AMessage {
 	 * @param end
 	 *            La fin de plage de l'<code>INode</code> destinataire.
 	 */
-	public MessageEndRange(long originalSource, long end) {
+	public MessageEndRange(UInt originalSource, UInt end) {
 		super(originalSource);
 		this.end = end;
 	}
@@ -32,7 +34,7 @@ public class MessageEndRange extends AMessage {
 	 * 
 	 * @return La fin de la nouvelle plage.
 	 */
-	public long getEnd() {
+	public UInt getEnd() {
 		return end;
 	}
 }

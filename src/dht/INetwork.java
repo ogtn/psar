@@ -39,7 +39,7 @@ public interface INetwork {
 
 		private static final long serialVersionUID = 1L;
 		private INode sourceNode;
-		private long unknowNodeId;
+		private UInt unknowNodeId;
 
 		/**
 		 * Crée et initialise une exception indiquant qu'un noeud ne peut
@@ -50,7 +50,7 @@ public interface INetwork {
 		 * @param unknowNodeId
 		 *            Identifiant du noeud inconnu.
 		 */
-		public NodeNotFoundException(INode sourceNode, long unknowNodeId) {
+		public NodeNotFoundException(INode sourceNode, UInt unknowNodeId) {
 			this.sourceNode = sourceNode;
 			this.unknowNodeId = unknowNodeId;
 		}
@@ -78,7 +78,7 @@ public interface INetwork {
 	void init(INode node) throws NetworkException;
 
 	// TODO
-	void sendTo(long id, AMessage message)
+	void sendTo(UInt id, AMessage message)
 			throws NodeNotFoundException, NetworkException;
 
 	/**
@@ -95,7 +95,7 @@ public interface INetwork {
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageAskConnection message)
+	void sendTo(UInt id, MessageAskConnection message)
 			throws NodeNotFoundException, NetworkException;
 
 	/**
@@ -112,7 +112,7 @@ public interface INetwork {
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageConnect message) throws NodeNotFoundException,
+	void sendTo(UInt id, MessageConnect message) throws NodeNotFoundException,
 			NetworkException;
 
 	/**
@@ -129,7 +129,7 @@ public interface INetwork {
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageDisconnect message)
+	void sendTo(UInt id, MessageDisconnect message)
 			throws NodeNotFoundException, NetworkException;
 
 	/**
@@ -146,7 +146,7 @@ public interface INetwork {
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageConnectTo message) throws NodeNotFoundException,
+	void sendTo(UInt id, MessageConnectTo message) throws NodeNotFoundException,
 			NetworkException;
 
 	/**

@@ -1,5 +1,7 @@
 package dht.message;
 
+import dht.UInt;
+
 /**
  * Message chargé d'indiquer la connection d'une <code>INode</code> à une autre.
  * 
@@ -19,7 +21,7 @@ public class MessageConnect extends AMessage {
 	 *            Identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessageConnect(long originalSource) {
+	public MessageConnect(UInt originalSource) {
 		super(originalSource);
 	}
 }

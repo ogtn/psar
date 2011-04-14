@@ -1,5 +1,7 @@
 package dht.message;
 
+import dht.UInt;
+
 /**
  * Message servant à transmettre une donnée ainsi qu'une fin de plage. Ce
  * message est utilisé lors de l'insertion et de la suppression d'une
@@ -8,9 +10,9 @@ package dht.message;
 public class MessageDataRange extends AMessage {
 
 	private static final long serialVersionUID = 1L;
-	private long key;
+	private UInt key;
 	private Object data;
-	private long endRange;
+	private UInt endRange;
 
 	/**
 	 * Crée et initialise une message de transferts de données et de fin de
@@ -26,8 +28,8 @@ public class MessageDataRange extends AMessage {
 	 * @param endRange
 	 *            La nouvelle fin de plage de l'<code>INode</code> récepteur.
 	 */
-	public MessageDataRange(long originalSource, long key, Object data,
-			long endRange) {
+	public MessageDataRange(UInt originalSource, UInt key, Object data,
+			UInt endRange) {
 		super(originalSource);
 		this.key = key;
 		this.data = data;
@@ -39,7 +41,7 @@ public class MessageDataRange extends AMessage {
 	 * 
 	 * @return La clé de la donnée transférée.
 	 */
-	public long getKey() {
+	public UInt getKey() {
 		return key;
 	}
 
@@ -57,7 +59,7 @@ public class MessageDataRange extends AMessage {
 	 * 
 	 * @return La nouvelle fin de plage de l'<code>INode</code> récepteur.
 	 */
-	public long getEndRange() {
+	public UInt getEndRange() {
 		return endRange;
 	}
 }

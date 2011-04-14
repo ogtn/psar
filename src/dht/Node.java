@@ -17,7 +17,6 @@ import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
 
-
 // TODO com
 /**
  * Implémentation concrète d'un noeud de l'application.
@@ -32,15 +31,15 @@ public class Node implements INode, Runnable {
 		DISCONNECTED, CONNECTING, DISCONNECTING, RUN, CONNECTING_NEXT
 	};
 
-	private long id;
+	private UInt id;
 	private Status status;
 	private INetwork inetwork;
-	private long next;
-	private long previous;
+	private UInt next;
+	private UInt previous;
 	private Range range;
 
 	/**
-   *
+	 * 
 	 * Crée et intialise un noeud déconnecté de tout voisin.
 	 * 
 	 * @param inetwork
@@ -49,7 +48,7 @@ public class Node implements INode, Runnable {
 	 * @param id
 	 *            Identifiant du noeud.
 	 */
-	public Node(INetwork inetwork, long id) {
+	public Node(INetwork inetwork, UInt id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
 		this(inetwork, id, id);
 		range = new Range(id);
@@ -67,11 +66,11 @@ public class Node implements INode, Runnable {
 	 *            Identifiant du premier noeud auquel le noeud devra se
 	 *            connecter.
 	 */
-	public Node(INetwork inetwork, long id, long firstNode) {
+	public Node(INetwork inetwork, UInt id, UInt firstNode) {
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
-		previous = -1;
+		previous = null;
 		status = Status.DISCONNECTED;
 		range = new Range(id, false);
 	}
@@ -80,7 +79,7 @@ public class Node implements INode, Runnable {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public long getId() {
+	public UInt getId() {
 		return id;
 	}
 
@@ -203,7 +202,7 @@ public class Node implements INode, Runnable {
 			inetwork.sendTo(msg.getOriginalSource(), new MessageConnectTo(id,
 					next));
 
-			long endOfRange = range.getEnd();
+			UInt endOfRange = range.getEnd();
 
 			// Transfert DATA
 			Data data = range.shrinkToLast(msg.getOriginalSource());
@@ -240,28 +239,30 @@ public class Node implements INode, Runnable {
 
 	private void route(MessagePing msg) {
 
-		Map<Long, Object> data = range.getData();
-		Iterator<Entry<Long, Object>> iter = data.entrySet().iterator();
+		Map<UInt, Object> data = range.getData();
+		Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
 		String out = "";
 
 		while (iter.hasNext()) {
-			Entry<Long, Object> entry = iter.next();
+			Entry<UInt, Object> entry = iter.next();
 			out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
 		}
 
-		System.out.println("Id: " + id + " " + range + "  " + out);
+		System.out.println("Ping Id: " + id + " " + range + "  " + out);
 
-		if (msg.getOriginalSource() != id)
+		if (msg.getOriginalSource().equals(id) == false)
 			inetwork.sendTo(next, msg);
 	}
 
 	// TODO synchronized
+	@Override
 	public void ping() {
 		inetwork.sendTo(next, new MessagePing(id));
 	}
 
 	// TODO synchronized
-	public void put(Object data, long key) {
+	@Override
+	public void put(Object data, UInt key) {
 
 		if (range.inRange(key))
 			range.add(key, data);
@@ -270,9 +271,10 @@ public class Node implements INode, Runnable {
 	}
 
 	// TODO synchronized
+	@Override
 	public void leave() {
 
-		long beginRange = range.getBegin();
+		UInt beginRange = range.getBegin();
 
 		// Envoi du reste de la plage
 		inetwork.sendTo(next, new MessageBeginRange(id, beginRange));
@@ -282,11 +284,11 @@ public class Node implements INode, Runnable {
 		inetwork.sendTo(next, new MessageDisconnect(id));
 		inetwork.sendTo(previous, new MessageConnectTo(id, next));
 		inetwork.sendTo(previous, new MessageDisconnect(id));
-
 	}
 
 	// TODO synchronized
-	public void get(long key) {
+	@Override
+	public void get(UInt key) {
 		if (range.inRange(key)) {
 			Object tmpData = range.get(key);
 
@@ -297,8 +299,7 @@ public class Node implements INode, Runnable {
 		} else
 			inetwork.sendTo(next, new MessageGet(id, key));
 	}
-
-	@Override
+	
 	public Range getRange() {
 		return range;
 	}

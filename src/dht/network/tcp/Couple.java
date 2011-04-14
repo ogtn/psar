@@ -3,13 +3,15 @@ package dht.network.tcp;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 
+import dht.UInt;
+
 /**
  * Couple associant à un identifiant de noeud une adresse ip et un port.
  */
 class Couple implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private long id;
+	private UInt id;
 	private InetSocketAddress addr;
 
 	/**
@@ -20,7 +22,7 @@ class Couple implements Serializable {
 	 * @param addr
 	 *            Adresse et port associé au noeud.
 	 */
-	Couple(long id, InetSocketAddress addr) {
+	Couple(UInt id, InetSocketAddress addr) {
 		this.id = id;
 		this.addr = addr;
 	}
@@ -30,7 +32,7 @@ class Couple implements Serializable {
 	 * 
 	 * @return L'identifiant du couple.
 	 */
-	long getId() {
+	UInt getId() {
 		return id;
 	}
 

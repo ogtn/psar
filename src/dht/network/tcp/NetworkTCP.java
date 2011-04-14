@@ -19,12 +19,12 @@ import java.util.Map;
 
 import dht.INetwork;
 import dht.INode;
+import dht.UInt;
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageDisconnect;
-import dht.message.MessagePing;
 import dht.tools.Tools;
 
 
@@ -43,7 +43,7 @@ public class NetworkTCP implements INetwork {
 	 * Map associant à chaque identifiant de noeud une adresse de socket serveur
 	 * ou l'on peut le contacter.
 	 */
-	final private Map<Long, InetSocketAddress> directory = new HashMap<Long, InetSocketAddress>();
+	final private Map<UInt, InetSocketAddress> directory = new HashMap<UInt, InetSocketAddress>();
 
 	/**
 	 * Crée et initialise un objet de gestion du réseau pour un noeud donné.
@@ -217,7 +217,7 @@ public class NetworkTCP implements INetwork {
 	}
 
 	@Override
-	public void sendTo(long id, AMessage message) throws NodeNotFoundException,
+	public void sendTo(UInt id, AMessage message) throws NodeNotFoundException,
 			NetworkException {
 
 		// System.out.println("[" + node.getId() + "] envoie un "
@@ -237,7 +237,7 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendTo(long id, MessageAskConnection message) {
+	public void sendTo(UInt id, MessageAskConnection message) {
 
 		// System.out.println("[" + node.getId()
 		// + "] envoie un MessageAskConnection à [" + id + "]");
@@ -273,7 +273,7 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendTo(long id, MessageConnect message) {
+	public void sendTo(UInt id, MessageConnect message) {
 
 		// System.out.println("[" + node.getId()
 		// + "] envoie un MessageConnect à [" + id + "]");
@@ -297,7 +297,7 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendTo(long id, MessageDisconnect message)
+	public void sendTo(UInt id, MessageDisconnect message)
 			throws NodeNotFoundException, NetworkException {
 
 		// System.out.println("[" + node.getId()
@@ -321,7 +321,7 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendTo(long id, MessageConnectTo message) {
+	public void sendTo(UInt id, MessageConnectTo message) {
 
 		// System.out.println("[" + node.getId()
 		// + "] envoie un MessageConnectTo à [" + id + "]");
