@@ -10,6 +10,7 @@ import dht.message.MessageAskConnection;
 import dht.message.MessageBeginRange;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
+import dht.message.MessageData;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
@@ -31,7 +32,7 @@ public class Node implements INode, Runnable {
 		DISCONNECTED, CONNECTING, DISCONNECTING, RUN, CONNECTING_NEXT
 	};
 
-	private UInt id;
+	private final UInt id;
 	private Status status;
 	private INetwork inetwork;
 	private UInt next;
@@ -67,12 +68,15 @@ public class Node implements INode, Runnable {
 	 *            connecter.
 	 */
 	public Node(INetwork inetwork, UInt id, UInt firstNode) {
+		
+		assert id != null : "id is null";
+		
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
 		previous = null;
 		status = Status.DISCONNECTED;
-		range = new Range(id, false);
+		range = new Range();
 	}
 
 	/**
@@ -139,10 +143,17 @@ public class Node implements INode, Runnable {
 				process((MessageGet) msg);
 			} else if (msg instanceof MessageBeginRange) {
 				process((MessageBeginRange) msg);
+			} else if (msg instanceof MessageData) {
+				process((MessageData) msg);
 			} else
 				System.err
 						.println("[" + id + "] Kernel panic! " + status + msg);
 		}
+	}
+
+	private void process(MessageData msg) {
+		range.insertExtend(msg.getKey(), msg.getData());
+		System.out.println(id + ": ajout de la donnée " + msg.getData() + " " + range);
 	}
 
 	private void process(MessageBeginRange msg) {
@@ -162,8 +173,10 @@ public class Node implements INode, Runnable {
 	}
 
 	private void process(MessageDataRange msg) {
+		System.out.println("DataRange" + id + ": " + range);
 		range.setEnd(msg.getEndRange());
-		range.addExtend(msg.getKey(), msg.getData());
+		range.insertExtend(msg.getKey(), msg.getData());
+		System.out.println("#DataRange" + id + ": " + range);
 	}
 
 	private void process(MessageConnectTo msg) {
@@ -177,7 +190,9 @@ public class Node implements INode, Runnable {
 		if (msg.getSource() != msg.getOriginalSource())
 			throw new IllegalStateException("Oh shit §§§§§§§§§ FUUUUUUUUUUUUUU");
 
-		previous = msg.getSource();
+		if(msg.gruick == false)
+			previous = msg.getSource();
+		System.out.println("Je suis le previous " + previous + " de " + id);
 	}
 
 	private void process(MessageEndRange msg) {
@@ -199,6 +214,9 @@ public class Node implements INode, Runnable {
 			inetwork.sendTo(next, new MessageDisconnect(id));
 
 			// Etablissement de la connection
+			inetwork.sendTo(msg.getOriginalSource(), new MessageConnect(id));
+			
+			// Envoi du suivant de la connection
 			inetwork.sendTo(msg.getOriginalSource(), new MessageConnectTo(id,
 					next));
 
@@ -239,6 +257,26 @@ public class Node implements INode, Runnable {
 
 	private void route(MessagePing msg) {
 
+		if (msg.getOriginalSource().equals(id) == false)
+		{
+			Map<UInt, Object> data = range.getData();
+			Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
+			String out = "";
+			
+			while (iter.hasNext()) {
+				Entry<UInt, Object> entry = iter.next();
+				out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
+			}
+			
+			System.out.println("Ping Id: " + id + " " + range + "  " + out + " previous : " + previous);
+			inetwork.sendTo(next, msg);
+		}		
+	}
+
+	// TODO synchronized
+	@Override
+	public void ping() {
+		
 		Map<UInt, Object> data = range.getData();
 		Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
 		String out = "";
@@ -248,15 +286,8 @@ public class Node implements INode, Runnable {
 			out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
 		}
 
-		System.out.println("Ping Id: " + id + " " + range + "  " + out);
-
-		if (msg.getOriginalSource().equals(id) == false)
-			inetwork.sendTo(next, msg);
-	}
-
-	// TODO synchronized
-	@Override
-	public void ping() {
+		System.out.println("Ping Id: " + id + " " + range + "  " + out + " previous : " + previous);
+		
 		inetwork.sendTo(next, new MessagePing(id));
 	}
 
@@ -276,12 +307,23 @@ public class Node implements INode, Runnable {
 
 		UInt beginRange = range.getBegin();
 
+		// Transfert DATA
+		Data data = range.shrinkToLast(id);
+		while (data != null) {
+			System.out.println(id + " envoi data " + data.getKey() + " à "
+					+ next);
+			inetwork.sendTo(next, new MessageData(id, data.getKey(), data.getData()));
+			data = range.shrinkToLast(id);
+		}
+		
 		// Envoi du reste de la plage
 		inetwork.sendTo(next, new MessageBeginRange(id, beginRange));
 		System.out.println(id + " envoi debut plage" + beginRange + " à "
 				+ next);
 
 		inetwork.sendTo(next, new MessageDisconnect(id));
+		System.out.println("id : " + id + "next " + next);
+		inetwork.sendTo(previous, new MessageConnect(id, true));
 		inetwork.sendTo(previous, new MessageConnectTo(id, next));
 		inetwork.sendTo(previous, new MessageDisconnect(id));
 	}
@@ -299,7 +341,7 @@ public class Node implements INode, Runnable {
 		} else
 			inetwork.sendTo(next, new MessageGet(id, key));
 	}
-	
+
 	public Range getRange() {
 		return range;
 	}
