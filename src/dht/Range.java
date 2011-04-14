@@ -37,11 +37,9 @@ public class Range {
 	 * @param key
 	 *            La clé utilisée pour le début de la plage.
 	 */
-	public Range(UInt key, boolean isNotAlone) {
+	public Range() {
 		
-		assert key != null : "nullable key";
-		
-		begin = new MutableUInt(key);
+		begin = new MutableUInt(null);
 		end = new MutableUInt(null);
 
 		data = new TreeMap<UInt, Object>(new Comparator<UInt>() {
@@ -77,7 +75,8 @@ public class Range {
 	 *            La clé utilisée pour le début de la plage.
 	 */
 	public Range(UInt key) {
-		this(key, true);
+		this();
+		begin.setUInt(key);
 		end.setUInt((key.toLong() - 1 + UInt.MAX_KEY) % UInt.MAX_KEY);
 	}
 
@@ -96,7 +95,7 @@ public class Range {
 	private static boolean inRange(UInt begin, UInt end, UInt key) {
 
 		// Plage vide
-		if (end == null)
+		if (end == null || begin == null)
 			return false;
 
 		// Pas de bouclage
@@ -119,7 +118,7 @@ public class Range {
 	 * @return <true> si la plage n'est pas vide, <false> sinon.
 	 */
 	private boolean isNotEmptyRange() {
-		return end.getUInt() != null;
+		return end.getUInt() != null && begin.getUInt() != null;
 	}
 
 	/**
@@ -199,6 +198,17 @@ public class Range {
 		if (inRange(key) == false)
 			end.setUInt(key);
 
+		this.data.put(key, data);
+	}
+
+	public void insertExtend(UInt key, Object data) {
+		
+		assert key != null : "nullable key";
+		assert data != null : "nullable data";
+		
+		if (inRange(key) == false)
+			begin.setUInt(key);
+		
 		this.data.put(key, data);
 	}
 
@@ -284,7 +294,7 @@ public class Range {
 
 		assert key != null : "nullable key";
 		
-		if (data.size() == 0 || isNotEmptyRange() == false)
+		if (data.size() == 0 || isNotEmptyRange() == false || inRange(key) == false)
 			return null;
 
 		UInt tmpKey = data.lastKey();

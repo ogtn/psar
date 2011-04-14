@@ -137,7 +137,7 @@ public final class UInt implements Serializable {
 	// TODO
 	@Override
 	public int hashCode() {
-		return (int) uInt;
+		return (int)(uInt ^ (uInt >>> 32));
 	}
 
 	/**

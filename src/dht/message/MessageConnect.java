@@ -14,6 +14,8 @@ public class MessageConnect extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 
+	public boolean gruick;
+	
 	/**
 	 * Crée et initialise un message de connection.
 	 * 
@@ -23,5 +25,12 @@ public class MessageConnect extends AMessage {
 	 */
 	public MessageConnect(UInt originalSource) {
 		super(originalSource);
+		gruick = false;
+	}
+	
+	
+	public MessageConnect(UInt originalSource, boolean gruick) {
+		super(originalSource);
+		this.gruick = gruick;
 	}
 }

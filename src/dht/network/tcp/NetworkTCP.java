@@ -329,13 +329,13 @@ public class NetworkTCP implements INetwork {
 		InetSocketAddress addr = directory.get(id);
 		if (addr == null)
 			throw new NodeNotFoundException(node, id);
-		Tools.close(next);
+		//Tools.close(next);
 
 		message.setSource(node.getId());
 
 		// TODO AHhhhhhhhhhhhhhhhhhhhhhhh
 		try {
-			next = SocketChannel.open(addr);
+			//next = SocketChannel.open(addr);
 			writeObject(
 					next,
 					new NetworkMessage(message, me, new Couple(message

@@ -23,3 +23,8 @@ ou tt au moins de l'écraser.
  Objet DATA regrouopant key + object???
  
  Detecion de code mort
+ 
+ Couche réseau:
+ 	openChannel
+ 	closeChannel
+ 	MessageConnect -> "MessageNewprevious"
