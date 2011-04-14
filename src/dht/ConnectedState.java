@@ -19,7 +19,7 @@ public class ConnectedState implements INodeState {
 		if (node.getRange().inRange(msg.getOriginalSource())) {
 			node.setState(new InsertingNextState());
 		} else {
-			node.getNetwork().sendTo(node.getNext(), msg);
+			node.getNetwork().sendInChannel(node.getNext(), msg);
 		}
 	}
 
@@ -43,6 +43,6 @@ public class ConnectedState implements INodeState {
 
 	@Override
 	public void recv(MessagePing msg) {
-		node.getNetwork().sendTo(node.getNext(), msg);
+		node.getNetwork().sendInChannel(node.getNext(), msg);
 	}
 }

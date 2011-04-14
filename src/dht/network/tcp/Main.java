@@ -23,7 +23,6 @@ public class Main {
 		}
 	}
 
-	private static final int NB_NODES = 90;
 
 	private static Node createNode(InetSocketAddress nodeAddr, UInt id) {
 		NetworkTCP net = new NetworkTCP(new Couple(id, nodeAddr));
@@ -69,9 +68,9 @@ public class Main {
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(new UInt((long) cpt), ids.get(0));
+				connectedNodes.put(new UInt(cpt), ids.get(0));
 			else
-				connectedNodes.put(new UInt((long) cpt), null);
+				connectedNodes.put(new UInt(cpt), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -256,7 +255,7 @@ public class Main {
 		data.put(new UInt(9000L), "9000");
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt((long) (generator.nextInt(10000))),
+			ids.add(new NetworkId(new UInt(generator.nextInt(10000)),
 					new InetSocketAddress(1515 + cpt)));
 
 		for (NetworkId id : ids)
@@ -420,60 +419,10 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-
 		//contigue(10);
 		//random(10);
-		//cokeAndPut(2);
+		//cokeAndPut(10);
 		//getMeIMFamous(10);
 		leaveMyAss(5);
-
-		/*
-		 * InetSocketAddress nodeAddr[] = new InetSocketAddress[NB_NODES + 1];
-		 * INetwork network[] = new NetworkTCP[NB_NODES + 1]; Node nodeTab[] =
-		 * new Node[NB_NODES + 1]; Thread threadTab[] = new Thread[NB_NODES +
-		 * 1];
-		 * 
-		 * nodeAddr[0] = new InetSocketAddress(1515); network[0] = new
-		 * NetworkTCP(new Couple(0, nodeAddr[0])); nodeTab[0] = new
-		 * Node(network[0], 0);
-		 * 
-		 * for (int i = 1; i < NB_NODES + 1; i++) { nodeAddr[i] = new
-		 * InetSocketAddress(1789 + i); network[i] = new NetworkTCP(new
-		 * Couple(i, nodeAddr[i]), new Couple( i - 1, nodeAddr[i - 1]));
-		 * nodeTab[i] = new Node(network[i], i, i - 1); }
-		 * 
-		 * for (int i = 0; i < NB_NODES + 1; i++) { threadTab[i] = new
-		 * Thread(nodeTab[i]); threadTab[i].start(); Thread.sleep(1000); }
-		 * 
-		 * Thread.sleep(1000);
-		 * 
-		 * for (int i = 0; i < NB_NODES; i++) {
-		 * 
-		 * }
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING")
-		 * ;
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING"
-		 * );
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING"
-		 * );
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING"
-		 * );
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING"
-		 * );
-		 * System.out.println("PINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPINGPING"
-		 * );
-		 * 
-		 * // TODO syncronizerdd nodeTab[0].ping();
-		 * 
-		 * for (int i = 0; i < NB_NODES; i++) { threadTab[i].join(); }
-		 */
 	}
 }

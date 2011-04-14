@@ -86,6 +86,7 @@ public final class UInt implements Serializable {
 	}
 
 	private static final long serialVersionUID = 1L;
+	// TODO
 	final static long MAX_KEY = 4294967296L;
 	private final long uInt;
 
@@ -122,13 +123,13 @@ public final class UInt implements Serializable {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-
+		
 		if (obj == null)
 			return false;
 
 		if (obj instanceof UInt) {
 			UInt key = (UInt) obj;
-			return key.toLong() == this.uInt;
+			return key.toLong() == uInt;
 		}
 
 		return false;
