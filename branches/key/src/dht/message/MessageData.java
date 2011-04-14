@@ -3,16 +3,15 @@ package dht.message;
 import dht.UInt;
 
 /**
- * Message servant à transmettre une donnée ainsi qu'une fin de plage. Ce
- * message est utilisé lors de l'insertion d'une <code>INode</code> pour la
- * transmission des données entre <code>INode</code>.
+ * Message servant à transmettre une donnée. Ce message est utilisé lors de la
+ * suppression d'une <code>INode</code> pour la transmission des données entre
+ * <code>INode</code>.
  */
-public class MessageDataRange extends AMessage {
+public class MessageData extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 	private UInt key;
 	private Object data;
-	private UInt endRange;
 
 	/**
 	 * Crée et initialise une message de transferts de données et de fin de
@@ -25,15 +24,11 @@ public class MessageDataRange extends AMessage {
 	 *            La clé de la donnée transférée.
 	 * @param data
 	 *            La donnée transférée.
-	 * @param endRange
-	 *            La nouvelle fin de plage de l'<code>INode</code> récepteur.
 	 */
-	public MessageDataRange(UInt originalSource, UInt key, Object data,
-			UInt endRange) {
+	public MessageData(UInt originalSource, UInt key, Object data) {
 		super(originalSource);
 		this.key = key;
 		this.data = data;
-		this.endRange = endRange;
 	}
 
 	/**
@@ -52,14 +47,5 @@ public class MessageDataRange extends AMessage {
 	 */
 	public Object getData() {
 		return data;
-	}
-
-	/**
-	 * Retourne la nouvelle fin de plage de l'<code>INode</code> récepteur.
-	 * 
-	 * @return La nouvelle fin de plage de l'<code>INode</code> récepteur.
-	 */
-	public UInt getEndRange() {
-		return endRange;
 	}
 }

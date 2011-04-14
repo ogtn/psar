@@ -201,6 +201,14 @@ public class Range {
 		this.data.put(key, data);
 	}
 
+	/**
+	 * Ajoute une donnée au début de la plage, en l'étendant si nécessaire.
+	 * 
+	 * @param key
+	 *            La clé de la donnée à ajouter.
+	 * @param data
+	 *            La donnée à ajouter.
+	 */
 	public void insertExtend(UInt key, Object data) {
 		
 		assert key != null : "nullable key";
