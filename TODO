@@ -3,8 +3,6 @@ Message d'erreur si identifiant identique.
 S'assurer de vider la table de correspondance id @ dans la couche réseau 
 ou tt au moins de l'écraser. 
   
-  Object Key a la place de long
-  
   todo range generics
   
   
