@@ -337,8 +337,8 @@ public class NetworkTCP implements INetwork {
 			// Recherche de l'adresse réseau du noeud émetteur de la demande
 			InetSocketAddress addr = directory.get(message.getOriginalSource());
 			if (addr == null)
-				throw new NodeNotFoundException(node, message
-						.getOriginalSource());
+				throw new NodeNotFoundException(node,
+						message.getOriginalSource());
 
 			// On transmet l'adresse réseau du noeud émetteur auquel le neoud
 			// récepteur pourra éventuellement répondre plus tard
@@ -369,8 +369,8 @@ public class NetworkTCP implements INetwork {
 			// message doit se connecter
 			InetSocketAddress addr = directory.get(message.getConnectNodeId());
 			if (addr == null)
-				throw new NodeNotFoundException(node, message
-						.getOriginalSource());
+				throw new NodeNotFoundException(node,
+						message.getOriginalSource());
 
 			// On transmet l'adresse réseau du noeud auquel le neoud
 			// récepteur devra se connecter
@@ -468,17 +468,30 @@ public class NetworkTCP implements INetwork {
 					directory.put(c.getId(), c.getAddr());
 				}
 			}
+/*
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 
-			if (msg instanceof MessagePing) {
-				System.err
-						.println("------------------------------------------------------------------------");
-				System.out.println("id: " + node.getId());
-				System.out.println("directory : " + directory);
-				System.out.println("nextId : " + nextId);
-				System.out.println("nextChannel : " + nextChannel);
-				System.out.println("nb selectors " + selector.keys().size());
-				System.err
-						.println("------------------------------------------------------------------------");
+			if (true || msg instanceof MessagePing) {
+/*
+				String str = "\n";
+				str += "id: " + node.getId() + "\n";
+				//str += "directory : " + directory + "\n";
+				str += "nextId : " + nextId + "\n";
+				//str += "nextChannel : " + nextChannel + "\n";
+				//str += "nb selectors " + selector.keys().size() + "\n";
+				str += "OriginalSource " + msg.getOriginalSource() + "\n";
+				str += "Source " + msg.getSource() + "\n";
+				str += "MSG " + msg.toString().split("@")[0] + "\n";// msg.getClass().getName());
+				
+				System.out
+						.println("------------------------------------------------------------------------"
+								+ str
+								+ "------------------------------------------------------------------------");*/
 			}
 
 		} catch (IOException e) {

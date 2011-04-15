@@ -419,10 +419,10 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		//contigue(10);
+		contigue(10);
 		//random(10);
 		//cokeAndPut(10);
 		//getMeIMFamous(10);
-		leaveMyAss(5);
+		//leaveMyAss(5);
 	}
 }
