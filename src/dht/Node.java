@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import dht.INetwork.NetworkException;
 import dht.Range.Data;
 import dht.message.AMessage;
 import dht.message.MessageBeginRange;
@@ -28,7 +27,7 @@ public class Node implements INode, Runnable {
 	private UInt next;
 	private UInt previous;
 	private final Range range;
-	private NodeState state;
+	private ANodeState state;
 	private final BlockingQueue<AMessage> queue;
 
 	/**
@@ -43,14 +42,14 @@ public class Node implements INode, Runnable {
 	 */
 	public Node(INetwork inetwork, UInt id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
-		
+
 		queue = new ArrayBlockingQueue<AMessage>(42);
 		this.inetwork = inetwork;
 		this.id = id;
 		next = id;
 		previous = null;
 		range = new Range(id);
-		state = new Gruiiiiik(inetwork, queue, this, range);
+		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
 	/**
@@ -75,7 +74,7 @@ public class Node implements INode, Runnable {
 		next = firstNode;
 		previous = null;
 		range = new Range();
-		state = new Gruiiiiik(inetwork, queue, this, range);
+		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
 	/**
@@ -193,7 +192,8 @@ public class Node implements INode, Runnable {
 
 	@Override
 	public String toString() {
-		return "id : '" + id + "' next '" + next + "' previous '" + previous + "'"+ range;
+		return "id : '" + id + "' next '" + next + "' previous '" + previous
+				+ "' status: '" + state.getClass().getName() + "' " + range;
 	}
 
 	UInt getNext() {
@@ -210,5 +210,14 @@ public class Node implements INode, Runnable {
 
 	UInt getPrevious() {
 		return previous;
+	}
+
+	void setState(ANodeState state) {
+
+		System.out.println("	Le noeud " + id + " passe de l'etat '"
+				+ this.state.getClass().getName() + "' à '"
+				+ state.getClass().getName() + "'");
+
+		this.state = state;
 	}
 }
