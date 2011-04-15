@@ -1,5 +1,7 @@
 package dht.message;
 
+import dht.UInt;
+
 /**
  * Message envoyé à une <code>INode</code> pour lui indiquer le début de sa
  * nouvelle plage de données. Ce message est utilisé lorsqu'une
@@ -10,7 +12,7 @@ package dht.message;
 public class MessageBeginRange extends AMessage {
 
 	private static final long serialVersionUID = 1L;
-	private long beginRange;
+	private UInt beginRange;
 
 	/**
 	 * Crée et initialise un message indiquant le début de la nouvelle plage de
@@ -22,7 +24,7 @@ public class MessageBeginRange extends AMessage {
 	 * @param beginRange
 	 *            La clé du nouveau début de la plage de données.
 	 */
-	public MessageBeginRange(long originalSource, long beginRange) {
+	public MessageBeginRange(UInt originalSource, UInt beginRange) {
 		super(originalSource);
 		this.beginRange = beginRange;
 	}
@@ -32,7 +34,7 @@ public class MessageBeginRange extends AMessage {
 	 * 
 	 * @return Le début de la nouvelle plage de données.
 	 */
-	public long getBegin() {
+	public UInt getBegin() {
 		return beginRange;
 	}
 }

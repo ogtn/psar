@@ -1,24 +1,19 @@
 Message d'erreur si identifiant identique.
 
 S'assurer de vider la table de correspondance id @ dans la couche réseau 
-ou tt au moins de l'écraser. 
-  
-  Object Key a la place de long
+ou tt au moins de l'écraser. -> Remplcer par genrics
   
   todo range generics
-  
   
  Leave
  	-Si un seul noeud
  	-Memem msg? Prise en compte de la deco des deux canaux
  	-Transfert data
- 	-Probvleme du MessageBeginRange vide.
+ 	-Probleme du MessageBeginRange vide.
  	
  Insert
  	-transfert de donnée alterntive en suiv ant un ordionnaceur code en c et en pouytohn pr etre plus ou mins agressif
- 	
- Test 
- 	couche réseau + prise enc compte fifo des nex canaux
+
  	
  Objet DATA regrouopant key + object???
  

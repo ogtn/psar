@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import dht.message.AMessage;
 
-
 /**
  * Classe chargée d'encapsuler les messages envoyés par le noeud dans des
  * messages réseaux afin d'assurer la diffusion des adresses IP et ports
@@ -12,8 +11,23 @@ import dht.message.AMessage;
  */
 class NetworkMessage implements Serializable {
 
+	/**
+	 * Type de message
+	 * */
+	enum Type {
+		/* Lorsque l'on ouvre un canal */
+		OPEN_CHANNEL,
+		/* Lorsque l'on ferme un canal */
+		CLOSE_CHANNEL,
+		/* Lorsque l'on envoie un messsage via un canal */
+		MESSAGE_IN_CHANNEL,
+		/* Lorsque l'on envoie un messsage via un canal ouvert temporairement */
+		MESSAGE_OUT_CHANNEL
+	}
+
 	private static final long serialVersionUID = 1L;
-	private AMessage content;
+	private final AMessage content;
+	private final Type type;
 
 	/**
 	 * Couples devant être transmis entre les noeuds.
@@ -28,7 +42,8 @@ class NetworkMessage implements Serializable {
 	 * @param couples
 	 *            Les couples d'identifiant de noeuds/et d'identifiants réseaux
 	 */
-	NetworkMessage(AMessage content, Couple... couples) {
+	NetworkMessage(Type type, AMessage content, Couple... couples) {
+		this.type = type;
 		this.couples = couples;
 		this.content = content;
 	}
@@ -41,6 +56,16 @@ class NetworkMessage implements Serializable {
 	 */
 	AMessage getContent() {
 		return content;
+	}
+
+	// TODO
+	/**
+	 * Retourne le type de message
+	 * 
+	 * @return
+	 */
+	public Type getType() {
+		return type;
 	}
 
 	/**
@@ -73,3 +98,9 @@ class NetworkMessage implements Serializable {
 		return strBuild.toString();
 	}
 }
+
+// OPEN_CONNECTION CONNECTED
+// CLOSE_CONNECTION CONNECTED
+// MESSAGE_IN_CONNECTION CONNECTED
+// MESSAGE_OUT_CONNECTION DISCONNECTED
+
