@@ -367,6 +367,6 @@ public class Range {
 	 */
 	@Override
 	public String toString() {
-		return "range[" + begin + ":" + end + "| data: " + data.size() + "]";
+		return "range[" + begin + ":" + end + "| data: " + data + "]";
 	}
 }
