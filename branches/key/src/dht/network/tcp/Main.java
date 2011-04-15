@@ -419,7 +419,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		contigue(10);
+		contigue(2);
 		//random(10);
 		//cokeAndPut(10);
 		//getMeIMFamous(10);

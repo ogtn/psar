@@ -18,3 +18,5 @@ ou tt au moins de l'écraser. -> Remplcer par genrics
  Objet DATA regrouopant key + object???
  
  Detecion de code mort
+
+ Pour apres : timeout sur file lors du "defilement", pour ne pas bloquer en l'attente d'un message jamais reçu 

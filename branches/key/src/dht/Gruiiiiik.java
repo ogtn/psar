@@ -19,34 +19,29 @@ import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
 
-public class Gruiiiiik extends NodeState {
+public class Gruiiiiik extends ANodeState {
 	boolean connecting;
-
-	public Gruiiiiik(INetwork inetwork, BlockingQueue<AMessage> queue,
+	
+	/*
+	Gruiiiiik(INetwork inetwork, BlockingQueue<AMessage> queue,
 			Node node, Range range) {
 		super(inetwork, queue, node, range);
 		connecting = false;
-	}
+	}*/
 
 	@Override
-	public void run() {
-
-		// /!\ GAFFE A CE TRUC DE MERDE
-		// Je suis le premier noeud
-		if (node.getNext().equals(node.getId())) {
-			// Etablissement d'un connection bouclante vers moi même
-			inetwork.openChannel(node.getNext());
-			inetwork.sendInChannel(node.getNext(),
-					new MessageConnect(node.getId()));
-		} else {
-			// Envoi d'un message de demande de connection
-			inetwork.sendTo(node.getNext(),
-					new MessageAskConnection(node.getId()));
-			connecting = true;
-		}
-
+	void run() {
+		
 		try {
 			while (true) {
+				
+				// /!\ GAFFE A CE TRUC DE MERDE
+				if (node.getNext().equals(node.getId())) {
+
+				} else {
+					connecting = true;
+				}
+				
 				AMessage msg = queue.take();
 
 				if (msg instanceof MessageAskConnection) {
@@ -79,16 +74,19 @@ public class Gruiiiiik extends NodeState {
 		}
 	}
 
+	@Override
 	void process(MessageData msg) {
 		range.insertExtend(msg.getKey(), msg.getData());
 		System.out.println(node.getId() + ": ajout de la donnée "
 				+ msg.getData() + " " + range);
 	}
 
+	@Override
 	void process(MessageBeginRange msg) {
 		range.setBegin(msg.getBegin());
 	}
 
+	@Override
 	void process(MessageGet msg) {
 		if (range.inRange(msg.getKey())) {
 			Object tmpData = range.get(msg.getKey());
@@ -101,6 +99,7 @@ public class Gruiiiiik extends NodeState {
 			inetwork.sendInChannel(node.getNext(), msg);
 	}
 
+	@Override
 	void process(MessageDataRange msg) {
 		System.out.println("DataRange" + node.getId() + ": " + range);
 		range.setEnd(msg.getEndRange());
@@ -108,6 +107,7 @@ public class Gruiiiiik extends NodeState {
 		System.out.println("#DataRange" + node.getId() + ": " + range);
 	}
 
+	@Override
 	void process(MessageConnectTo msg) {
 
 		/* Je suis en attente de connection a l'anneau */
@@ -128,9 +128,9 @@ public class Gruiiiiik extends NodeState {
 			inetwork.sendInChannel(node.getNext(),
 					new MessageConnect(node.getId()));
 		}
-
 	}
 
+	@Override
 	void process(MessageConnect msg) {
 
 		if (msg.getSource() != msg.getOriginalSource())
@@ -139,11 +139,13 @@ public class Gruiiiiik extends NodeState {
 		node.setPrevious(msg.getSource());
 	}
 
+	@Override
 	void process(MessageEndRange msg) {
 		range.setEnd(msg.getEnd());
 		range.setBegin(node.getId());
 	}
 
+	@Override
 	void process(MessageAskConnection msg) {
 
 		if (range.inRange(msg.getOriginalSource())) {
@@ -190,6 +192,7 @@ public class Gruiiiiik extends NodeState {
 		}
 	}
 
+	@Override
 	void process(MessagePut msg) {
 		if (range.inRange(msg.getKey()) == false) {
 			System.out.println("Route MessagePut Data : " + msg.getKey());
@@ -198,6 +201,7 @@ public class Gruiiiiik extends NodeState {
 			range.add(msg.getKey(), msg.getData());
 	}
 
+	@Override
 	void process(MessagePing msg) {
 
 		if (msg.getOriginalSource().equals(node.getId()) == false) {

@@ -35,6 +35,8 @@ import dht.tools.Tools;
  */
 public class NetworkTCP implements INetwork {
 
+	private static boolean gruickPrint = true;
+
 	private INode node;
 	private Selector selector;
 	final private Couple me;
@@ -282,6 +284,10 @@ public class NetworkTCP implements INetwork {
 	public void sendTo(UInt id, AMessage message) throws NodeNotFoundException,
 			NetworkException {
 
+		if (gruickPrint)
+			System.out.println("Envoi de message hors bande : " + message
+					+ " de " + node.getId() + " à " + id);
+
 		SocketChannel next = null;
 		InetSocketAddress addr = directory.get(id);
 		if (addr == null)
@@ -307,6 +313,10 @@ public class NetworkTCP implements INetwork {
 	public void sendInChannel(UInt id, AMessage message)
 			throws ChannelNotFoundException, NetworkException {
 
+		if (gruickPrint)
+			System.out.println("Envoi de message in bande : " + message
+					+ " de " + node.getId() + " à " + id);
+
 		if (nextId == null || nextId != id)
 			throw new ChannelNotFoundException(node, id);
 
@@ -327,6 +337,10 @@ public class NetworkTCP implements INetwork {
 	public void sendInChannel(UInt id, MessageAskConnection message)
 			throws NodeNotFoundException, ChannelNotFoundException,
 			NetworkException {
+
+		if (gruickPrint)
+			System.out.println("Envoi de message in bande : " + message
+					+ " de " + node.getId() + " à " + id);
 
 		if (nextId == null || nextId != id)
 			throw new ChannelNotFoundException(node, id);
@@ -358,6 +372,10 @@ public class NetworkTCP implements INetwork {
 	public void sendInChannel(UInt id, MessageConnectTo message)
 			throws NodeNotFoundException, ChannelNotFoundException,
 			NetworkException {
+
+		if (gruickPrint)
+			System.out.println("Envoi de message in bande : " + message
+					+ " de " + node.getId() + " à " + id);
 
 		if (nextId == null || nextId != id)
 			throw new ChannelNotFoundException(node, id);
@@ -468,30 +486,28 @@ public class NetworkTCP implements INetwork {
 					directory.put(c.getId(), c.getAddr());
 				}
 			}
-/*
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
+			/*
+			 * try { Thread.sleep(250); } catch (InterruptedException e) { //
+			 * TODO Auto-generated catch block e.printStackTrace(); }
+			 */
 
 			if (true || msg instanceof MessagePing) {
-/*
+
 				String str = "\n";
 				str += "id: " + node.getId() + "\n";
-				//str += "directory : " + directory + "\n";
+				// str += "directory : " + directory + "\n";
 				str += "nextId : " + nextId + "\n";
-				//str += "nextChannel : " + nextChannel + "\n";
-				//str += "nb selectors " + selector.keys().size() + "\n";
+				// str += "nextChannel : " + nextChannel + "\n";
+				// str += "nb selectors " + selector.keys().size() + "\n";
 				str += "OriginalSource " + msg.getOriginalSource() + "\n";
 				str += "Source " + msg.getSource() + "\n";
 				str += "MSG " + msg.toString().split("@")[0] + "\n";// msg.getClass().getName());
-				
-				System.out
-						.println("------------------------------------------------------------------------"
-								+ str
-								+ "------------------------------------------------------------------------");*/
+
+				if (gruickPrint)
+					System.out
+							.println("------------------------------------------------------------------------"
+									+ str
+									+ "------------------------------------------------------------------------");
 			}
 
 		} catch (IOException e) {
