@@ -26,10 +26,10 @@ public class StateConnecting extends ANodeState {
 				msg = queue.take();
 				if (msg instanceof MessageConnectTo) {
 					process((MessageConnectTo) msg);
-				} else
+				} /*else
 					System.err.println("Kernel panic dans "
 							+ this.getClass().getName() + " pr msg : '" + msg
-							+ "' node : [" + node + "]");
+							+ "' node : [" + node + "]");*/
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

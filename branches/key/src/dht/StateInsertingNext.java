@@ -30,9 +30,10 @@ public class StateInsertingNext extends ANodeState {
 			inetwork.sendInChannel(node.getNext(),
 					new MessageDisconnect(node.getId()));
 			inetwork.closeChannel(node.getNext());
-
+			
 			// Etablissement de la connection
 			inetwork.openChannel(msg.getOriginalSource());
+			node.setNext(msg.getOriginalSource());
 
 			// Envoi du suivant de la connection
 			inetwork.sendInChannel(msg.getOriginalSource(),
@@ -41,17 +42,18 @@ public class StateInsertingNext extends ANodeState {
 			UInt endOfRange = range.getEnd();
 
 			// TODO alternatif Transfert DATA
-			Data data = range.shrinkToLast(msg.getOriginalSource());
+			UInt dataDest = msg.getOriginalSource();
+			Data data = range.shrinkToLast(dataDest);
 			while (data != null) {
-				System.out.println(node.getId() + " envoi data "
-						+ data.getKey() + " à " + msg.getOriginalSource());
+				System.out.println("d");
 				inetwork.sendInChannel(
-						msg.getOriginalSource(),
+						dataDest,
 						new MessageDataRange(node.getId(), data.getKey(), data
 								.getData(), endOfRange));
-				data = range.shrinkToLast(msg.getOriginalSource());
+				data = range.shrinkToLast(dataDest);
 
 				if (queue.isEmpty() == false) {
+					System.out.println("C");
 					AMessage msg;
 					msg = queue.take();
 					
@@ -61,47 +63,25 @@ public class StateInsertingNext extends ANodeState {
 						process((MessagePut) msg);
 					} else if (msg instanceof MessageGet) {
 						process((MessageGet) msg);
-					} else
+					} /*else
 						System.err.println("Kernel panic dans "
 								+ this.getClass().getName() + " pr msg : '"
-								+ msg + "' node : [" + node + "]");
+								+ msg + "' node : [" + node + "]");*/
 				}
 			}
 
 			// Calcul de la nouvelle plage
-			range.shrinkEnd(msg.getOriginalSource());
+			range.shrinkEnd(dataDest);
 
 			// Envoi de la plage
-			inetwork.sendInChannel(msg.getOriginalSource(),
-					new MessageEndRange(node.getId(), endOfRange));
+			inetwork.sendInChannel(dataDest, new MessageEndRange(node.getId(), endOfRange));
 
-			node.setNext(msg.getOriginalSource());
+			node.setNext(dataDest);
 
 			node.setState(new StateConnected(inetwork, queue, node, range));
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	@Override
-	void process(MessageGet msg) {
-		if (range.inRange(msg.getKey())) {
-			Object tmpData = range.get(msg.getKey());
-
-			if (tmpData == null)
-				System.out.println("Fail : " + msg.getKey());
-			else
-				System.out.println("Ok : " + tmpData + " id: " + node.getId());
-		} else
-			inetwork.sendInChannel(node.getNext(), msg);
-	}
-
-	@Override
-	void process(MessagePut msg) {
-		if (range.inRange(msg.getKey()) == false) {
-			inetwork.sendInChannel(node.getNext(), msg);
-		} else
-			range.add(msg.getKey(), msg.getData());
 	}
 }

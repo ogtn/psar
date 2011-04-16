@@ -35,9 +35,9 @@ public class StateConnectedWaitRange extends ANodeState {
 					process((MessagePut) msg);
 				} else if (msg instanceof MessageGet) {
 					process((MessageGet) msg);
-				} else
+				} /*else
 					System.err.println("[" + node + "] Kernel panic! "
-							+ this.getClass().getName());
+							+ this.getClass().getName());*/
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -69,10 +69,10 @@ public class StateConnectedWaitRange extends ANodeState {
 		if (range.inRange(msg.getKey())) {
 			Object tmpData = range.get(msg.getKey());
 
-			if (tmpData == null)
+			/*if (tmpData == null)
 				System.out.println("Fail : " + msg.getKey());
 			else
-				System.out.println("Ok : " + tmpData + " id: " + node.getId());
+				System.out.println("Ok : " + tmpData + " id: " + node.getId());*/
 		} else
 			inetwork.sendInChannel(node.getNext(), msg);
 	}

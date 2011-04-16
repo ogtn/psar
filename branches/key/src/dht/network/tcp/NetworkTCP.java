@@ -314,10 +314,10 @@ public class NetworkTCP implements INetwork {
 			throws ChannelNotFoundException, NetworkException {
 
 		if (gruickPrint)
-			System.out.println("Envoi de message in bande : " + message
+			System.out.println("nextId. "  + nextId + "Envoi de message in bande : " + message
 					+ " de " + node.getId() + " à " + id);
 
-		if (nextId == null || nextId != id)
+		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
 		message.setSource(node.getId());
@@ -496,11 +496,11 @@ public class NetworkTCP implements INetwork {
 				String str = "\n";
 				str += "id: " + node.getId() + " ";
 				// str += "directory : " + directory + "\n";
-				//str += "nextId : " + nextId + "\n";
+				// str += "nextId : " + nextId + "\n";
 				// str += "nextChannel : " + nextChannel + "\n";
 				// str += "nb selectors " + selector.keys().size() + "\n";
-				//str += "OriginalSource " + msg.getOriginalSource() + "\n";
-				//str += "Source " + msg.getSource() + "\n";
+				// str += "OriginalSource " + msg.getOriginalSource() + "\n";
+				// str += "Source " + msg.getSource() + "\n";
 				str += " recoit un MSG " + msg.toString().split("@")[0] + " ";// msg.getClass().getName());
 				str += " de " + msg.getSource() + "\n";
 

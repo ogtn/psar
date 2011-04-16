@@ -144,7 +144,7 @@ public class Main {
 		List<NetworkId> ids = new LinkedList<NetworkId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
-		ids.add(new NetworkId(new UInt(0L), new InetSocketAddress(732)));
+		ids.add(new NetworkId(new UInt(0L), new InetSocketAddress(1732)));
 		ids.add(new NetworkId(new UInt(4000L), new InetSocketAddress(1515)));
 		ids.add(new NetworkId(new UInt(8000L), new InetSocketAddress(1789)));
 
@@ -155,40 +155,58 @@ public class Main {
 				connectedNodes.put(ids.get(cpt).id, null);
 
 		init(ids, connectedNodes, threads, nodes);
-		
+
 		for (Thread t : threads) {
+
 			t.start();
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		StringBuilder strBuild = new StringBuilder(); 
-		
-		for(int cpt=0; cpt<(512 * 1024); cpt++) {
+
+		StringBuilder strBuild = new StringBuilder();
+
+		for (int cpt = 0; cpt < (512 * 1024); cpt++) {
 			strBuild.append("K");
 		}
-		
+
 		String hh = strBuild.toString();
-		
-		for(int cpt=2000; cpt<2200; cpt++) {
+
+		for (int cpt = 2000; cpt < 2100; cpt++) {
 			nodes.get(0).put(hh, new UInt(cpt));
 		}
-		
+
+		// nodes.get(0).ping();
+
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		nodes.get(1).put("A", new UInt(4000));
-		
-		Node node = new Node(new NetworkTCP(new Couple(new UInt(2000L),
-				new InetSocketAddress(1941)), new Couple(new UInt(0L),
-				new InetSocketAddress(732))), new UInt(2000L));
-		
+
+		Node node = createNode(new InetSocketAddress(1941), new UInt(2000L),
+				new UInt(0L), new InetSocketAddress(1732));
+
 		new Thread(node).start();
+
+		//nodes.get(2).ping();
 		
-		while(true) {
-			nodes.get(3).get(new UInt(4000));			
+		while (true) {
+			nodes.get(2).get(new UInt(4000));
 		}
+		/*	
+		try {
+			threads.get(0).join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+
 	}
 
 	private static void cokeAndPut(final int n) {
@@ -472,7 +490,8 @@ public class Main {
 	public static void main(String[] args) throws InterruptedException {
 		// contigue(10);
 		// random(10);
-		cokeAndPut(10);
+		// cokeAndPut(10);
+		coranAlternatif();
 		// getMeIMFamous(10);
 		// leaveMyAss(2); TODO pq ce marche?
 		// leaveMyAss(5);

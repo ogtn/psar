@@ -214,9 +214,9 @@ public class Node implements INode, Runnable {
 
 	void setState(ANodeState state) {
 
-		System.out.println("	Le noeud " + id + " passe de l'etat '"
+		/*System.out.println("	Le noeud " + id + " passe de l'etat '"
 				+ this.state.getClass().getName() + "' à '"
-				+ state.getClass().getName() + "'");
+				+ state.getClass().getName() + "'");*/
 
 		this.state = state;
 	}
