@@ -22,3 +22,24 @@ ou tt au moins de l'écraser. -> Remplcer par genrics
  -Run + filtre 
  -Fn leave get put remplace par msg
  -Meth doit remonter a son proprio
+ -synchronized la couche réseau peut etre
+ -probleme de l'etat disconnecting inexistant (cf methode leave()...) + quand deconnexion, on doit vider nitre file de requettes
+ -l'etat StateDisconnected prose probleme: un noeud qui passe en deco va essayer de se reco automatiquement
+ 
+ 
+ 
+ Suppression des StateX.run():
+ 	_ajout d'une methode blocante getNextMessage(), qui retourne le prochaine message filtré par l'etat
+ 	_un etat appelle le processX() de son etat suivant plutot que de lui transmettre via le Cstor
+ 	_dans le run() de node:
+ 	
+ 	while(true??){
+ 		msg = state.getNextMsg();
+ 		
+ 		switch instance of...
+ 		
+ 		state.process(msg);
+ 	}
+ 	
+ 	
+ 	 

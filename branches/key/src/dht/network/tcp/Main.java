@@ -175,11 +175,11 @@ public class Main {
 
 		String hh = strBuild.toString();
 
-		for (int cpt = 2000; cpt < 2100; cpt++) {
+		for (int cpt = 2000; cpt < 2025; cpt++) {
 			nodes.get(0).put(hh, new UInt(cpt));
 		}
 
-		// nodes.get(0).ping();
+		nodes.get(0).ping();
 
 		try {
 			Thread.sleep(1000);
@@ -193,11 +193,18 @@ public class Main {
 				new UInt(0L), new InetSocketAddress(1732));
 
 		new Thread(node).start();
-
-		//nodes.get(2).ping();
 		
-		while (true) {
-			nodes.get(2).get(new UInt(4000));
+		/*try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}*/
+		System.out.println("=====");
+		nodes.get(0).ping();
+		
+		int i = 30;
+		while (i-- > 0) {
+			//nodes.get(2).get(new UInt(4444));
 		}
 		/*	
 		try {
@@ -488,12 +495,12 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		// contigue(10);
-		// random(10);
+		//contigue(10);
+		random(10);
 		// cokeAndPut(10);
-		coranAlternatif();
 		// getMeIMFamous(10);
 		// leaveMyAss(2); TODO pq ce marche?
 		// leaveMyAss(5);
+		//coranAlternatif();
 	}
 }
