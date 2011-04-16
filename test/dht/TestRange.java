@@ -90,19 +90,29 @@ public class TestRange {
 		assertNull(range.shrinkToLast(new UInt(500)));
 
 		assertEquals(range.getEnd(), new UInt(449));
-
+		assertEquals(range.getBegin(), new UInt(450));
+		
 		range.add(new UInt(100), new UInt(100));
 		range.add(new UInt(1000), new UInt(1000));
 		range.add(new UInt(2000), new UInt(2000));
+		range.add(new UInt(450), new UInt(450));
 
 		assertEquals(range.shrinkToLast(new UInt(2000)).getKey(), new UInt(100));
 		assertEquals(range.getEnd(), new UInt(99));
+		assertEquals(range.getBegin(), new UInt(450));
+		
 		assertEquals(range.shrinkToLast(new UInt(2000)).getKey(), new UInt(2000));
 		assertEquals(range.getEnd(), new UInt(1999));
+		assertEquals(range.getBegin(), new UInt(450));
 
-		// TODO : fail
 		assertNull(range.shrinkToLast(new UInt(2000)));
 		assertEquals(range.getEnd(), new UInt(1999));
+				
+		assertEquals(range.shrinkToLast(new UInt(1000)).getKey(), new UInt(1000));
+		assertEquals(range.shrinkToLast(new UInt(450)).getKey(), new UInt(450));
+		
+		assertEquals(range.getEnd(), null);
+		assertEquals(range.getBegin(), null);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)

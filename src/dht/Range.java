@@ -38,7 +38,7 @@ public class Range {
 	 *            La clé utilisée pour le début de la plage.
 	 */
 	public Range() {
-		
+
 		begin = new MutableUInt(null);
 		end = new MutableUInt(null);
 
@@ -158,7 +158,7 @@ public class Range {
 	 */
 	boolean inRange(UInt key) {
 		assert key != null : "nullable key";
-		
+
 		return inRange(begin.getUInt(), end.getUInt(), key);
 	}
 
@@ -171,10 +171,10 @@ public class Range {
 	 *            La donnée à ajouter.
 	 */
 	void add(UInt key, Object data) {
-		
+
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
-		
+
 		if (!inRange(key))
 			throw new IndexOutOfBoundsException("Ajout impossible: la clé "
 					+ key + " n'est pas dans le " + toString());
@@ -191,10 +191,10 @@ public class Range {
 	 *            La donnée à ajouter.
 	 */
 	void addExtend(UInt key, Object data) {
-		
+
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
-		
+
 		if (inRange(key) == false)
 			end.setUInt(key);
 
@@ -210,13 +210,13 @@ public class Range {
 	 *            La donnée à ajouter.
 	 */
 	public void insertExtend(UInt key, Object data) {
-		
+
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
-		
+
 		if (inRange(key) == false)
 			begin.setUInt(key);
-		
+
 		this.data.put(key, data);
 	}
 
@@ -260,12 +260,18 @@ public class Range {
 	 *             alors qu'une donnée est présente dans l'intervalle rétrécit.
 	 */
 	void shrinkEnd(UInt end) throws IndexOutOfBoundsException {
-		
+
 		assert end != null : "nullable key";
-		
-		UInt tmpEnd = new UInt((end.toLong() - 1 + UInt.MAX_KEY) % UInt.MAX_KEY);
-		check(begin.getUInt(), tmpEnd);
-		this.end.setUInt(tmpEnd);
+
+		if (data.comparator().compare(end, begin.getUInt()) == 0) {
+			begin.setUInt((Long)null);
+			this.end.setUInt((Long)null);
+		} else {
+			UInt tmpEnd = new UInt((end.toLong() - 1 + UInt.MAX_KEY)
+					% UInt.MAX_KEY);
+			check(begin.getUInt(), tmpEnd);
+			this.end.setUInt(tmpEnd);
+		}
 	}
 
 	/**
@@ -301,8 +307,9 @@ public class Range {
 	Data shrinkToLast(UInt key) {
 
 		assert key != null : "nullable key";
-		
-		if (data.size() == 0 || isNotEmptyRange() == false || inRange(key) == false)
+
+		if (data.size() == 0 || isNotEmptyRange() == false
+				|| inRange(key) == false)
 			return null;
 
 		UInt tmpKey = data.lastKey();
@@ -332,9 +339,9 @@ public class Range {
 	 *            La nouvelle fin de la plage.
 	 */
 	void setEnd(UInt end) {
-		
+
 		assert end != null : "nullable key";
-		
+
 		check(begin.getUInt(), end);
 		this.end.setUInt(end);
 	}
@@ -355,9 +362,9 @@ public class Range {
 	 *            Le nouveau début de la plage.
 	 */
 	void setBegin(UInt begin) {
-		
+
 		assert begin != null : "nullable key";
-		
+
 		check(begin, end.getUInt());
 		this.begin.setUInt(begin);
 	}

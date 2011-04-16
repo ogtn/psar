@@ -23,7 +23,6 @@ public class Main {
 		}
 	}
 
-
 	private static Node createNode(InetSocketAddress nodeAddr, UInt id) {
 		NetworkTCP net = new NetworkTCP(new Couple(id, nodeAddr));
 		return new Node(net, id);
@@ -140,6 +139,58 @@ public class Main {
 		}
 	}
 
+	private static void coranAlternatif() {
+		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<NetworkId> ids = new LinkedList<NetworkId>();
+		List<Thread> threads = new LinkedList<Thread>();
+		List<Node> nodes = new LinkedList<Node>();
+		ids.add(new NetworkId(new UInt(0L), new InetSocketAddress(732)));
+		ids.add(new NetworkId(new UInt(4000L), new InetSocketAddress(1515)));
+		ids.add(new NetworkId(new UInt(8000L), new InetSocketAddress(1789)));
+
+		for (int cpt = 0; cpt < ids.size(); cpt++)
+			if (cpt != 0)
+				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+			else
+				connectedNodes.put(ids.get(cpt).id, null);
+
+		init(ids, connectedNodes, threads, nodes);
+		
+		for (Thread t : threads) {
+			t.start();
+		}
+		
+		StringBuilder strBuild = new StringBuilder(); 
+		
+		for(int cpt=0; cpt<(512 * 1024); cpt++) {
+			strBuild.append("K");
+		}
+		
+		String hh = strBuild.toString();
+		
+		for(int cpt=2000; cpt<2200; cpt++) {
+			nodes.get(0).put(hh, new UInt(cpt));
+		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		nodes.get(1).put("A", new UInt(4000));
+		
+		Node node = new Node(new NetworkTCP(new Couple(new UInt(2000L),
+				new InetSocketAddress(1941)), new Couple(new UInt(0L),
+				new InetSocketAddress(732))), new UInt(2000L));
+		
+		new Thread(node).start();
+		
+		while(true) {
+			nodes.get(3).get(new UInt(4000));			
+		}
+	}
+
 	private static void cokeAndPut(final int n) {
 
 		Map<UInt, Object> data = new HashMap<UInt, Object>();
@@ -176,7 +227,7 @@ public class Main {
 		int cpt = 0;
 		for (Thread t : threads) {
 			t.start();
-			
+
 			try {
 				t.sleep(1000);
 			} catch (InterruptedException e) {
@@ -337,11 +388,12 @@ public class Main {
 		Map<UInt, Object> data = new HashMap<UInt, Object>();
 
 		data.put(new UInt(1000L), "1000");
+		data.put(new UInt(2763L), "2763");
 		data.put(new UInt(2000L), "2000");
 		data.put(new UInt(5000L), "5000");
 		data.put(new UInt(7000L), "7000");
 		data.put(new UInt(9000L), "9000");
-		
+
 		generator.setSeed(42);
 
 		for (int cpt = 0; cpt < n; cpt++)
@@ -361,17 +413,16 @@ public class Main {
 		init(ids, connectedNodes, threads, nodes);
 
 		int cpt = 0;
-		
+
 		for (Thread t : threads) {
 			t.start();
-			
+
 			if (cpt == 0) {
 				for (Entry<UInt, Object> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getValue(), entry.getKey());
 				}
 			}
 			cpt++;
-			
 
 			try {
 				t.sleep(1000);
@@ -397,7 +448,7 @@ public class Main {
 		// /////////////////////////////////////////////////////////////////
 
 		System.out.println("===== " + nodes.get(1).getId() + " se déco : ");
-		
+
 		nodes.get(1).leave();
 
 		try {
@@ -419,10 +470,11 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		contigue(2);
-		//random(10);
-		//cokeAndPut(10);
-		//getMeIMFamous(10);
-		//leaveMyAss(5);
+		// contigue(10);
+		// random(10);
+		cokeAndPut(10);
+		// getMeIMFamous(10);
+		// leaveMyAss(2); TODO pq ce marche?
+		// leaveMyAss(5);
 	}
 }

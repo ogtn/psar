@@ -2,16 +2,13 @@ package dht;
 
 import java.util.concurrent.BlockingQueue;
 
-import dht.Range.Data;
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageBeginRange;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
-import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
-import dht.message.MessageEndRange;
 import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
@@ -19,7 +16,7 @@ import dht.message.MessagePut;
 public class StateConnected extends ANodeState {
 
 	private boolean quit = false;
-	
+
 	StateConnected(INetwork inetwork, BlockingQueue<AMessage> queue, Node node,
 			Range range) {
 		super(inetwork, queue, node, range);
@@ -38,6 +35,16 @@ public class StateConnected extends ANodeState {
 					process((MessageData) msg);
 				} else if (msg instanceof MessagePing) {
 					process((MessagePing) msg);
+				} else if (msg instanceof MessageConnect) {
+					process((MessageConnect) msg);
+				} else if (msg instanceof MessagePut) {
+					process((MessagePut) msg);
+				} else if (msg instanceof MessageGet) {
+					process((MessageGet) msg);
+				} else if (msg instanceof MessageBeginRange) {
+					process((MessageBeginRange) msg);
+				} else if (msg instanceof MessageConnectTo) {
+					process((MessageConnectTo) msg);
 				} else
 					System.err.println("Kernel panic dans "
 							+ this.getClass().getName() + " pr msg : '" + msg
@@ -49,9 +56,6 @@ public class StateConnected extends ANodeState {
 	}
 
 	void process(MessageAskConnection msg) {
-		
-		System.out.println("Ducon ; " + node.getId() + " recoit " + msg);
-		
 		if (range.inRange(msg.getOriginalSource())) {
 			node.setState(new StateInsertingNext(inetwork, queue, node, range,
 					msg));
@@ -62,11 +66,53 @@ public class StateConnected extends ANodeState {
 	}
 
 	void process(MessageData msg) {
-		if (range.inRange(msg.getOriginalSource())) {
-			node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
-					range, msg));
-		} else {
+		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
+				range, msg));
+		quit = true;
+	}
+
+	@Override
+	void process(MessageBeginRange msg) {
+		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
+				range, msg));
+		quit = true;
+	}
+
+	@Override
+	void process(MessageGet msg) {
+		if (range.inRange(msg.getKey())) {
+			Object tmpData = range.get(msg.getKey());
+
+			if (tmpData == null)
+				System.out.println("Fail : " + msg.getKey());
+			else
+				System.out.println("Ok : " + tmpData + " id: " + node.getId());
+		} else
 			inetwork.sendInChannel(node.getNext(), msg);
-		}
+	}
+
+	@Override
+	void process(MessagePut msg) {
+		if (range.inRange(msg.getKey()) == false) {
+			inetwork.sendInChannel(node.getNext(), msg);
+		} else
+			range.add(msg.getKey(), msg.getData());
+	}
+
+	@Override
+	void process(MessageConnect msg) {
+		node.setPrevious(msg.getSource());
+	}
+
+	@Override
+	void process(MessageConnectTo msg) {
+		/* Mon précédent se déconnecte */
+
+		inetwork.sendInChannel(node.getNext(),
+				new MessageDisconnect(node.getId()));
+		inetwork.closeChannel(node.getNext());
+		node.setNext(msg.getConnectNodeId());
+		inetwork.openChannel(node.getNext());
+		inetwork.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
 	}
 }
