@@ -1,8 +1,6 @@
 package dht;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
@@ -35,6 +33,8 @@ abstract class ANodeState {
 	}
 
 	abstract void run();
+	
+	
 
 	void process(MessageAskConnection msg) {
 	}
@@ -65,26 +65,30 @@ abstract class ANodeState {
 
 	void process(MessageGet msg) {
 		if (range.inRange(msg.getKey())) {
+
 			Object tmpData = range.get(msg.getKey());
 
 			if (tmpData == null)
 				System.out.println("Fail : " + msg.getKey());
 			else
 				System.out.println("Ok : " + tmpData + " id: " + node.getId());
-		} else
+		} else {
+			System.out.println(node.getId() + "route get vers "
+					+ node.getNext());
 			inetwork.sendInChannel(node.getNext(), msg);
+		}
 	}
 
 	void process(MessagePing msg) {
 		if (msg.getOriginalSource().equals(node.getId()) == false) {
 			Map<UInt, Object> data = range.getData();
-			/*Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
-			String out = "";
-
-			while (iter.hasNext()) {
-				Entry<UInt, Object> entry = iter.next();
-				out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
-			}*/
+			/*
+			 * Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
+			 * String out = "";
+			 * 
+			 * while (iter.hasNext()) { Entry<UInt, Object> entry = iter.next();
+			 * out += "{" + entry.getKey() + " : " + entry.getValue() + "}"; }
+			 */
 
 			System.out.println("PING : " + node);
 			inetwork.sendInChannel(node.getNext(), msg);
@@ -94,7 +98,10 @@ abstract class ANodeState {
 	void process(MessagePut msg) {
 		if (range.inRange(msg.getKey()) == false) {
 			inetwork.sendInChannel(node.getNext(), msg);
-		} else
+		} else {
+			System.out.println(node.getId() + "route put vers "
+					+ node.getNext());
 			range.add(msg.getKey(), msg.getData());
+		}
 	}
 }

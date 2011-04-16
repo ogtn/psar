@@ -33,7 +33,7 @@ public class StateInsertingNext extends ANodeState {
 			
 			// Etablissement de la connection
 			inetwork.openChannel(msg.getOriginalSource());
-			node.setNext(msg.getOriginalSource());
+			//node.setNext(msg.getOriginalSource());
 
 			// Envoi du suivant de la connection
 			inetwork.sendInChannel(msg.getOriginalSource(),
@@ -44,8 +44,11 @@ public class StateInsertingNext extends ANodeState {
 			// TODO alternatif Transfert DATA
 			UInt dataDest = msg.getOriginalSource();
 			Data data = range.shrinkToLast(dataDest);
+			
+			String str = "";
+			
 			while (data != null) {
-				System.out.println("d");
+				str+= "D";
 				inetwork.sendInChannel(
 						dataDest,
 						new MessageDataRange(node.getId(), data.getKey(), data
@@ -53,7 +56,7 @@ public class StateInsertingNext extends ANodeState {
 				data = range.shrinkToLast(dataDest);
 
 				if (queue.isEmpty() == false) {
-					System.out.println("C");
+					str += "C";
 					AMessage msg;
 					msg = queue.take();
 					
@@ -70,6 +73,7 @@ public class StateInsertingNext extends ANodeState {
 				}
 			}
 
+			System.out.println(str);
 			// Calcul de la nouvelle plage
 			range.shrinkEnd(dataDest);
 

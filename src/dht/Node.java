@@ -65,9 +65,6 @@ public class Node implements INode, Runnable {
 	 *            connecter.
 	 */
 	public Node(INetwork inetwork, UInt id, UInt firstNode) {
-
-		assert id != null : "id is null";
-
 		queue = new ArrayBlockingQueue<AMessage>(42);
 		this.inetwork = inetwork;
 		this.id = id;
@@ -96,7 +93,7 @@ public class Node implements INode, Runnable {
 			@Override
 			public void run() {
 				while (true) {
-					try {
+					try {						
 						queue.put(inetwork.receive());
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -130,7 +127,6 @@ public class Node implements INode, Runnable {
 	// TODO synchronized
 	@Override
 	public void put(Object data, UInt key) {
-
 		if (range.inRange(key))
 			range.add(key, data);
 		else
@@ -183,7 +179,10 @@ public class Node implements INode, Runnable {
 			else
 				System.out.println("Ok : " + tmpData + " id: " + id);
 		} else
+		{
+			//System.out.println("Envoie de " + id + " GET a " + next);
 			inetwork.sendInChannel(next, new MessageGet(id, key));
+		}
 	}
 
 	public Range getRange() {
