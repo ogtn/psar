@@ -3,17 +3,16 @@ package dht;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
-import dht.message.MessageAskConnection;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
-import dht.message.MessageData;
-import dht.message.MessageDisconnect;
 
 /**
  * Etat du noeud qui est entrain de rejoindre l'anneau.
  */
 public class StateConnecting extends ANodeState {
 
+	private boolean quit = false;
+	
 	StateConnecting(INetwork inetwork, BlockingQueue<AMessage> queue,
 			Node node, Range range) {
 		super(inetwork, queue, node, range);
@@ -22,7 +21,7 @@ public class StateConnecting extends ANodeState {
 	@Override
 	void run() {
 		try {
-			while (true) {
+			while (!quit) {
 				AMessage msg;
 				msg = queue.take();
 				if (msg instanceof MessageConnectTo) {
@@ -47,7 +46,9 @@ public class StateConnecting extends ANodeState {
 		node.setNext(msg.getConnectNodeId());
 		inetwork.openChannel(node.getNext());
 		inetwork.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
-
+		node.setPrevious(msg.getSource());
+		
 		node.setState(new StateConnectedWaitRange(inetwork, queue, node, range));
+		quit = true;
 	}
 }

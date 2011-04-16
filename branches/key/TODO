@@ -3,20 +3,22 @@ Message d'erreur si identifiant identique.
 S'assurer de vider la table de correspondance id @ dans la couche réseau 
 ou tt au moins de l'écraser. -> Remplcer par genrics
   
-  todo range generics
-  
  Leave
  	-Si un seul noeud
  	-Memem msg? Prise en compte de la deco des deux canaux
  	-Transfert data
- 	-Probleme du MessageBeginRange vide.
  	
  Insert
  	-transfert de donnée alterntive en suiv ant un ordionnaceur code en c et en pouytohn pr etre plus ou mins agressif
-
- 	
+	
  Objet DATA regrouopant key + object???
  
  Detecion de code mort
 
  Pour apres : timeout sur file lors du "defilement", pour ne pas bloquer en l'attente d'un message jamais reçu 
+ 
+ -grapiz
+ -Transfert des datas alterntivement
+ -Run + filtre 
+ -Fn leave get put remplace par msg
+ -Meth doit remonter a son proprio

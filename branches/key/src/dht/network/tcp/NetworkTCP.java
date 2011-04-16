@@ -35,7 +35,7 @@ import dht.tools.Tools;
  */
 public class NetworkTCP implements INetwork {
 
-	private static boolean gruickPrint = true;
+	private static boolean gruickPrint = false;
 
 	private INode node;
 	private Selector selector;
@@ -494,14 +494,15 @@ public class NetworkTCP implements INetwork {
 			if (true || msg instanceof MessagePing) {
 
 				String str = "\n";
-				str += "id: " + node.getId() + "\n";
+				str += "id: " + node.getId() + " ";
 				// str += "directory : " + directory + "\n";
-				str += "nextId : " + nextId + "\n";
+				//str += "nextId : " + nextId + "\n";
 				// str += "nextChannel : " + nextChannel + "\n";
 				// str += "nb selectors " + selector.keys().size() + "\n";
-				str += "OriginalSource " + msg.getOriginalSource() + "\n";
-				str += "Source " + msg.getSource() + "\n";
-				str += "MSG " + msg.toString().split("@")[0] + "\n";// msg.getClass().getName());
+				//str += "OriginalSource " + msg.getOriginalSource() + "\n";
+				//str += "Source " + msg.getSource() + "\n";
+				str += " recoit un MSG " + msg.toString().split("@")[0] + " ";// msg.getClass().getName());
+				str += " de " + msg.getSource() + "\n";
 
 				if (gruickPrint)
 					System.out
