@@ -45,10 +45,10 @@ public class StateConnected extends ANodeState {
 					process((MessageBeginRange) msg);
 				} else if (msg instanceof MessageConnectTo) {
 					process((MessageConnectTo) msg);
-				} else
+				} /*else
 					System.err.println("Kernel panic dans "
 							+ this.getClass().getName() + " pr msg : '" + msg
-							+ "' node : [" + node + "]");
+							+ "' node : [" + node + "]");*/
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -76,27 +76,6 @@ public class StateConnected extends ANodeState {
 		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
 				range, msg));
 		quit = true;
-	}
-
-	@Override
-	void process(MessageGet msg) {
-		if (range.inRange(msg.getKey())) {
-			Object tmpData = range.get(msg.getKey());
-
-			if (tmpData == null)
-				System.out.println("Fail : " + msg.getKey());
-			else
-				System.out.println("Ok : " + tmpData + " id: " + node.getId());
-		} else
-			inetwork.sendInChannel(node.getNext(), msg);
-	}
-
-	@Override
-	void process(MessagePut msg) {
-		if (range.inRange(msg.getKey()) == false) {
-			inetwork.sendInChannel(node.getNext(), msg);
-		} else
-			range.add(msg.getKey(), msg.getData());
 	}
 
 	@Override

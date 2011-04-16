@@ -36,9 +36,9 @@ public class StatePreviousDisconnecting extends ANodeState {
 				} else if (msg instanceof MessageBeginRange) {
 					process((MessageBeginRange) msg);
 				} else
-					System.err.println("Kernel panic dans "
+					/*System.err.println("Kernel panic dans "
 							+ this.getClass().getName() + " pr msg : '" + msg
-							+ "' node : [" + node + "]");
+							+ "' node : [" + node + "]");*/
 				if(!quit)
 					msg = queue.take();
 			}
