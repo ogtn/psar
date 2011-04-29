@@ -95,6 +95,9 @@ public class StateDisconnecting extends ANodeState {
 		dataTransfer();
 	}
 
+	// TODO vérifier que l'on appelle dataTransfer(); sur toutes les methodes
+	// non filtrées
+	
 	@Override
 	void process(MessageDisconnect msg) {
 		// TODO vider la file des messages que l'on ne peut traiter

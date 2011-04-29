@@ -237,4 +237,9 @@ public class Node implements INode, Runnable {
 		this.state = state;
 		this.state.init();
 	}
+	
+	// TODO delete
+	public String getState() {
+		return state.getClass().getName();
+	}
 }

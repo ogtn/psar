@@ -176,7 +176,7 @@ public class Main {
 		String hh = strBuild.toString();
 
 		for (int cpt = 2000; cpt < 2025; cpt++) {
-			nodes.get(0).put(hh, new UInt(cpt));
+			nodes.get(0).put(new UInt(cpt), hh);
 		}
 
 		nodes.get(0).ping();
@@ -187,7 +187,7 @@ public class Main {
 			e.printStackTrace();
 		}
 
-		nodes.get(1).put("A", new UInt(4000));
+		nodes.get(1).put(new UInt(4000), "A");
 
 		Node node = createNode(new InetSocketAddress(1941), new UInt(2000L),
 				new UInt(0L), new InetSocketAddress(1732));
@@ -273,7 +273,9 @@ public class Main {
 			e.printStackTrace();
 		}
 
+		System.out.println("----- PING -----");
 		// TODO syncronizerdd
+		
 		nodes.get(0).ping();
 
 		try {
@@ -352,7 +354,7 @@ public class Main {
 
 			if (cpt == 0) {
 				for (Entry<UInt, Object> entry : data.entrySet()) {
-					nodes.get(0).put(entry.getValue(), entry.getKey());
+					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
 			cpt++;
@@ -444,7 +446,7 @@ public class Main {
 
 			if (cpt == 0) {
 				for (Entry<UInt, Object> entry : data.entrySet()) {
-					nodes.get(0).put(entry.getValue(), entry.getKey());
+					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
 			cpt++;
@@ -497,10 +499,10 @@ public class Main {
 	public static void main(String[] args) throws InterruptedException {
 		//contigue(10);
 		//random(10);
-		cokeAndPut(10);
-		// getMeIMFamous(10);
-		// leaveMyAss(2); TODO pq ce marche?
-		// leaveMyAss(5);
+		//cokeAndPut(3);
+		//getMeIMFamous(10);
+		//leaveMyAss(2); TODO pq ce marche?
+		//leaveMyAss(5);
 		//coranAlternatif();
 	}
 }
