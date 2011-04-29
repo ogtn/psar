@@ -28,8 +28,8 @@ public class StateInsertingNext extends ANodeState {
 	void init() {
 
 		// Déconnexion du suivant
-		inetwork.sendInChannel(node.getNext(),
-				new MessageDisconnect(node.getId()));
+		inetwork.sendInChannel(node.getNext(), new MessageDisconnect(node
+				.getId()));
 		inetwork.closeChannel(node.getNext());
 
 		// Etablissement de la connection vers le nouveau suivant
@@ -57,17 +57,27 @@ public class StateInsertingNext extends ANodeState {
 		Data data = range.shrinkToLast(node.getNext());
 
 		while (data != null) {
-			inetwork.sendInChannel(
-					node.getNext(),
-					new MessageDataRange(node.getId(), data.getKey(), data
-							.getData(), oldEndRange));
+			inetwork.sendInChannel(node.getNext(), new MessageDataRange(node
+					.getId(), data.getKey(), data.getData(), oldEndRange));
 
 			// TODO filter is empty non bloquant
 			// Si j'ai reçu dans ma file un message que je peux traiter
 			if (queue.isEmpty() == false) {
+
+				System.out.println("Inserting next queue.isEmpty() "
+						+ queue.isEmpty());
+				System.out.println("Inserting next queue.size() "
+						+ queue.size());
+				System.out.println("Msg : ");
+				for (AMessage msg : queue) {
+					System.out.print(msg + " ");
+				}
+				System.out.println("");
+
 				// Je vais le traiter via un process
 				return;
 			}
+			data = range.shrinkToLast(node.getNext());
 		}
 
 		// MAJ de la nouvelle plage
@@ -77,23 +87,33 @@ public class StateInsertingNext extends ANodeState {
 		inetwork.sendInChannel(node.getNext(), new MessageEndRange(
 				node.getId(), oldEndRange));
 
+		System.out.println("Inserting next change d'état");
+
 		node.setState(new StateConnected(inetwork, queue, node, range));
 	}
-	
+
 	@Override
 	void process(MessageGet msg) {
 		super.process(msg);
 		dataTransfer();
 	}
-	
+
 	@Override
 	void process(MessagePut msg) {
 		super.process(msg);
 		dataTransfer();
 	}
-	
+
 	@Override
 	void process(MessagePing msg) {
+		super.process(msg);
+		dataTransfer();
+	}
+
+	// TODO vérifier que l'on appelle dataTransfer(); sur toutes les methodes
+	// non filtrées
+	@Override
+	void process(MessageDisconnect msg) {
 		super.process(msg);
 		dataTransfer();
 	}

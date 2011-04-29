@@ -495,6 +495,7 @@ public class NetworkTCP implements INetwork {
 
 				String str = "\n";
 				str += "id: " + node.getId() + " ";
+				str += "etat: " + node.getState() + " ";
 				// str += "directory : " + directory + "\n";
 				// str += "nextId : " + nextId + "\n";
 				// str += "nextChannel : " + nextChannel + "\n";
@@ -506,9 +507,7 @@ public class NetworkTCP implements INetwork {
 
 				if (gruickPrint)
 					System.out
-							.println("------------------------------------------------------------------------"
-									+ str
-									+ "------------------------------------------------------------------------");
+							.println(str);
 			}
 
 		} catch (IOException e) {

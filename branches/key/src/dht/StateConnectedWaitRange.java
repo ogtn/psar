@@ -27,6 +27,7 @@ public class StateConnectedWaitRange extends ANodeState {
 	 */
 	@Override
 	void process(MessageEndRange msg) {
+		
 		range.setEnd(msg.getEnd());
 		// On ne peut pas faire le setBegin à la reception de la 1ere donnée
 		// sinon on a un range du début jusqu'a la donnée le plus élevée.
