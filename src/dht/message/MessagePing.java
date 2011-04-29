@@ -1,6 +1,6 @@
 package dht.message;
 
-import dht.UInt;
+import dht.ANodeId;
 
 /**
  * Message routé à travers l'ensemble des <code>INode</code> de l'anneau.
@@ -16,7 +16,7 @@ public class MessagePing extends AMessage {
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessagePing(UInt originalSource) {
+	public MessagePing(ANodeId originalSource) {
 		super(originalSource);
 	}
 }

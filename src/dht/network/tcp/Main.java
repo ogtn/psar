@@ -11,43 +11,19 @@ import java.util.Map.Entry;
 import dht.UInt;
 import dht.Node;
 
-public class Main {
+class Main {
 
-	private static class NetworkId {
-		private UInt id;
-		private InetSocketAddress addr;
-
-		private NetworkId(UInt id, InetSocketAddress addr) {
-			this.id = id;
-			this.addr = addr;
-		}
-	}
-
-	private static Node createNode(InetSocketAddress nodeAddr, UInt id) {
-		NetworkTCP net = new NetworkTCP(new Couple(id, nodeAddr));
-		return new Node(net, id);
-	}
-
-	private static Node createNode(InetSocketAddress nodeAddr, UInt id,
-			UInt connectId, InetSocketAddress connectAddr) {
-
-		NetworkTCP net = new NetworkTCP(new Couple(id, nodeAddr), new Couple(
-				connectId, connectAddr));
-		return new Node(net, id, connectId);
-	}
-
-	static void init(List<NetworkId> ids, Map<UInt, NetworkId> connectedNodes,
+	static void init(List<TCPId> ids, Map<UInt, TCPId> connectedNodes,
 			List<Thread> threads, List<Node> nodes) {
 
-		for (NetworkId netId : ids) {
-			NetworkId connectId = connectedNodes.get(netId.id);
+		for (TCPId netId : ids) {
+			TCPId connectId = connectedNodes.get(netId.getUid());
 			Node node = null;
 
 			if (connectId != null) {
-				node = createNode(netId.addr, netId.id, connectId.id,
-						connectId.addr);
+				node = new Node(new NetworkTCP(), netId, connectId);
 			} else {
-				node = createNode(netId.addr, netId.id);
+				node = new Node(new NetworkTCP(), netId);
 			}
 			nodes.add(node);
 			threads.add(new Thread(node));
@@ -56,14 +32,15 @@ public class Main {
 
 	private static void contigue(final int n) {
 
-		List<NetworkId> ids = new LinkedList<NetworkId>();
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt(cpt), new InetSocketAddress(
-					1515 + cpt)));
+			ids
+					.add(new TCPId(new UInt(cpt), new InetSocketAddress(
+							1515 + cpt)));
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
@@ -97,23 +74,23 @@ public class Main {
 
 	private static void random(final int n) {
 
-		List<NetworkId> ids = new LinkedList<NetworkId>();
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt((long) (Math.random() * 1000) /*
-																		 * Range.
-																		 * MAX_KEY
-																		 */),
+			ids.add(new TCPId(new UInt((long) (Math.random() * 1000) /*
+																	 * Range.
+																	 * MAX_KEY
+																	 */),
 					new InetSocketAddress(1515 + cpt)));
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).id, null);
+				connectedNodes.put(ids.get(cpt).getUid(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -140,19 +117,19 @@ public class Main {
 	}
 
 	private static void coranAlternatif() {
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
-		List<NetworkId> ids = new LinkedList<NetworkId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
-		ids.add(new NetworkId(new UInt(0L), new InetSocketAddress(1732)));
-		ids.add(new NetworkId(new UInt(4000L), new InetSocketAddress(1515)));
-		ids.add(new NetworkId(new UInt(8000L), new InetSocketAddress(1789)));
+		ids.add(new TCPId(new UInt(0L), new InetSocketAddress(1732)));
+		ids.add(new TCPId(new UInt(4000L), new InetSocketAddress(1515)));
+		ids.add(new TCPId(new UInt(8000L), new InetSocketAddress(1789)));
 
 		for (int cpt = 0; cpt < ids.size(); cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).id, null);
+				connectedNodes.put(ids.get(cpt).getUid(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -189,30 +166,27 @@ public class Main {
 
 		nodes.get(1).put(new UInt(4000), "A");
 
-		Node node = createNode(new InetSocketAddress(1941), new UInt(2000L),
-				new UInt(0L), new InetSocketAddress(1732));
+		Node node = new Node(new NetworkTCP(), new TCPId(new UInt(2000L),
+				new InetSocketAddress(1941)), new TCPId(new UInt(0L),
+				new InetSocketAddress(1732)));
 
 		new Thread(node).start();
-		
-		/*try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
+
+		/*
+		 * try { Thread.sleep(1000); } catch (InterruptedException e) {
+		 * e.printStackTrace(); }
+		 */
 		System.out.println("=====");
 		nodes.get(0).ping();
-		
+
 		int i = 30;
 		while (i-- > 0) {
-			//nodes.get(2).get(new UInt(4444));
+			// nodes.get(2).get(new UInt(4444));
 		}
-		/*	
-		try {
-			threads.get(0).join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		/*
+		 * try { threads.get(0).join(); } catch (InterruptedException e) { //
+		 * TODO Auto-generated catch block e.printStackTrace(); }
+		 */
 
 	}
 
@@ -220,8 +194,8 @@ public class Main {
 
 		Map<UInt, Object> data = new HashMap<UInt, Object>();
 		Random generator = new Random();
-		List<NetworkId> ids = new LinkedList<NetworkId>();
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
 
@@ -234,18 +208,18 @@ public class Main {
 		data.put(new UInt(9000L), "9000");
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt((long) (generator.nextInt(10000))),
+			ids.add(new TCPId(new UInt((long) (generator.nextInt(10000))),
 					new InetSocketAddress(1515 + cpt)));
 
-		for (NetworkId id : ids)
-			System.out.println(id.id);
+		for (TCPId id : ids)
+			System.out.println(id.getUid());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).id, null);
+				connectedNodes.put(ids.get(cpt).getUid(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -275,7 +249,7 @@ public class Main {
 
 		System.out.println("----- PING -----");
 		// TODO syncronizerdd
-		
+
 		nodes.get(0).ping();
 
 		try {
@@ -319,8 +293,8 @@ public class Main {
 
 		Map<UInt, Object> data = new HashMap<UInt, Object>();
 		Random generator = new Random();
-		List<NetworkId> ids = new LinkedList<NetworkId>();
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
 
@@ -333,18 +307,18 @@ public class Main {
 		data.put(new UInt(9000L), "9000");
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt(generator.nextInt(10000)),
+			ids.add(new TCPId(new UInt(generator.nextInt(10000)),
 					new InetSocketAddress(1515 + cpt)));
 
-		for (NetworkId id : ids)
-			System.out.println(id.id);
+		for (TCPId id : ids)
+			System.out.println(id.getUid());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).id, null);
+				connectedNodes.put(ids.get(cpt).getUid(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -408,8 +382,8 @@ public class Main {
 	public static void leaveMyAss(int n) {
 
 		Random generator = new Random();
-		List<NetworkId> ids = new LinkedList<NetworkId>();
-		Map<UInt, NetworkId> connectedNodes = new HashMap<UInt, NetworkId>();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
 		Map<UInt, Object> data = new HashMap<UInt, Object>();
@@ -424,18 +398,18 @@ public class Main {
 		generator.setSeed(42);
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids.add(new NetworkId(new UInt((long) (generator.nextInt(10000))),
+			ids.add(new TCPId(new UInt((long) (generator.nextInt(10000))),
 					new InetSocketAddress(1515 + cpt)));
 
-		for (NetworkId id : ids)
-			System.out.println(id.id);
+		for (TCPId id : ids)
+			System.out.println(id.getUid());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).id, ids.get(0));
+				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).id, null);
+				connectedNodes.put(ids.get(cpt).getUid(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -497,7 +471,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		//contigue(10);
+		contigue(10);
 		//random(10);
 		//cokeAndPut(3);
 		//getMeIMFamous(10);

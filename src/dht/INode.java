@@ -8,7 +8,7 @@ public interface INode {
 	/**
 	 * Retorune l'identifiant du noeud.
 	 */
-	UInt getId();
+	ANodeId getId();
 
 	void ping();
 	
@@ -16,5 +16,7 @@ public interface INode {
 	
 	void leave();
 	
-	public void get(UInt key);
+	void get(UInt key);
+
+	String getState();
 }

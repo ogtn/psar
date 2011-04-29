@@ -1,45 +1,22 @@
-Message d'erreur si identifiant identique.
-
-S'assurer de vider la table de correspondance id @ dans la couche réseau 
-ou tt au moins de l'écraser. -> Remplcer par genrics
+Message d'erreur si identifiant identique : que se passe t-il en cas de messages identiques.
   
  Leave
  	-Si un seul noeud
- 	-Memem msg? Prise en compte de la deco des deux canaux
+ 	-Même msg? Prise en compte de la deco des deux canaux
  	-Transfert data
  	
- Insert
- 	-transfert de donnée alterntive en suiv ant un ordionnaceur code en c et en pouytohn pr etre plus ou mins agressif
-	
- Objet DATA regrouopant key + object???
+ Objet DATA regroupant key + object???
  
- Detecion de code mort
+ Détection de code mort
 
- Pour apres : timeout sur file lors du "defilement", pour ne pas bloquer en l'attente d'un message jamais reçu 
+ Pour après : timeout sur file lors du "défilement", pour ne pas bloquer en l'attente d'un message jamais reçu. 
  
  -grapiz
- -Transfert des datas alterntivement
+ -Transfert des datas alternativement
  -Run + filtre 
  -Fn leave get put remplace par msg
- -Meth doit remonter a son proprio
- -synchronized la couche réseau peut etre
- -probleme de l'etat disconnecting inexistant (cf methode leave()...) + quand deconnexion, on doit vider nitre file de requettes
- -l'etat StateDisconnected prose probleme: un noeud qui passe en deco va essayer de se reco automatiquement
- 
- 
- 
- Suppression des StateX.run():
- 	_ajout d'une methode blocante getNextMessage(), qui retourne le prochaine message filtré par l'etat
- 	_un etat appelle le processX() de son etat suivant plutot que de lui transmettre via le Cstor
- 	_dans le run() de node:
- 	
- 	while(true??){
- 		msg = state.getNextMsg();
- 		
- 		switch instance of...
- 		
- 		state.process(msg);
- 	}
+ -Méthode doit remonter a son propriétaire.
+ -problème de l'etat disconnecting inexistant (cf méthode leave()...) + quand déconnexion, on doit vider notre file de requêtes
  	
  	
  	 

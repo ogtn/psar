@@ -25,10 +25,10 @@ import dht.message.MessagePut;
  */
 public class Node implements INode, Runnable {
 
-	private final UInt id;
+	private final ANodeId id;
 	private final INetwork inetwork;
-	private UInt next;
-	private UInt previous;
+	private ANodeId next;
+	private ANodeId previous;
 	private final Range range;
 	private ANodeState state;
 	private final BlockingQueue<AMessage> queue;
@@ -42,7 +42,7 @@ public class Node implements INode, Runnable {
 	 * @param id
 	 *            Identifiant du noeud.
 	 */
-	public Node(INetwork inetwork, UInt id) {
+	public Node(INetwork inetwork, ANodeId id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
 
 		queue = new ArrayBlockingQueue<AMessage>(42);
@@ -50,7 +50,7 @@ public class Node implements INode, Runnable {
 		this.id = id;
 		next = id;
 		previous = null;
-		range = new Range(id);
+		range = new Range(id.getUid());
 		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
@@ -66,7 +66,7 @@ public class Node implements INode, Runnable {
 	 *            Identifiant du premier noeud auquel le noeud devra se
 	 *            connecter.
 	 */
-	public Node(INetwork inetwork, UInt id, UInt firstNode) {
+	public Node(INetwork inetwork, ANodeId id, ANodeId firstNode) {
 		queue = new ArrayBlockingQueue<AMessage>(42);
 		this.inetwork = inetwork;
 		this.id = id;
@@ -80,7 +80,7 @@ public class Node implements INode, Runnable {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public UInt getId() {
+	public ANodeId getId() {
 		return id;
 	}
 
@@ -187,6 +187,9 @@ public class Node implements INode, Runnable {
 	// TODO synchronized
 	@Override
 	public void get(UInt key) {
+		
+		// TODO dans a fr ds state
+		
 		if (range.inRange(key)) {
 			Object tmpData = range.get(key);
 
@@ -210,19 +213,19 @@ public class Node implements INode, Runnable {
 				+ "' status: '" + state.getClass().getName() + "' " + range;
 	}
 
-	UInt getNext() {
+	ANodeId getNext() {
 		return next;
 	}
 
-	void setNext(UInt next) {
+	void setNext(ANodeId next) {
 		this.next = next;
 	}
 
-	void setPrevious(UInt prev) {
+	void setPrevious(ANodeId prev) {
 		previous = prev;
 	}
 
-	UInt getPrevious() {
+	ANodeId getPrevious() {
 		return previous;
 	}
 

@@ -1,9 +1,10 @@
 package dht.message;
 
+import dht.ANodeId;
 import dht.UInt;
 
 /**
- * Message envoyé à une <code>Inode</code> pour récupérer une donnée dans la
+ * Message envoyé à une <code>INode</code> pour récupérer une donnée dans la
  * DHT.
  */
 public class MessageGet extends AMessage {
@@ -20,7 +21,7 @@ public class MessageGet extends AMessage {
 	 * @param key
 	 *            La clé de la donnée demandée.
 	 */
-	public MessageGet(UInt originalSource, UInt key) {
+	public MessageGet(ANodeId originalSource, UInt key) {
 		super(originalSource);
 		this.key = key;
 	}

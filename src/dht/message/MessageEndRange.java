@@ -1,5 +1,6 @@
 package dht.message;
 
+import dht.ANodeId;
 import dht.UInt;
 
 /**
@@ -24,7 +25,7 @@ public class MessageEndRange extends AMessage {
 	 * @param end
 	 *            La fin de plage de l'<code>INode</code> destinataire.
 	 */
-	public MessageEndRange(UInt originalSource, UInt end) {
+	public MessageEndRange(ANodeId originalSource, UInt end) {
 		super(originalSource);
 		this.end = end;
 	}

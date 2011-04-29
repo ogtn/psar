@@ -7,25 +7,19 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
+import dht.ANodeId;
 import dht.INetwork;
 import dht.INode;
-import dht.UInt;
 import dht.message.AMessage;
-import dht.message.MessageAskConnection;
-import dht.message.MessageConnectTo;
-import dht.message.MessagePing;
 import dht.network.tcp.NetworkMessage.Type;
 import dht.tools.Tools;
 
@@ -33,14 +27,14 @@ import dht.tools.Tools;
  * Interface implémentant les primitives de base de la couche réseau via le
  * protocole TCP .
  */
-public class NetworkTCP implements INetwork {
+class NetworkTCP implements INetwork {
 
+	// TODO
 	private static boolean gruickPrint = false;
 
 	private INode node;
 	private Selector selector;
-	final private Couple me;
-	private UInt nextId;
+	private TCPId nextId;
 	private SocketChannel nextChannel;
 
 	/**
@@ -49,42 +43,14 @@ public class NetworkTCP implements INetwork {
 	private final Queue<SocketChannel> pendingConnections;
 
 	/**
-	 * Map associant à chaque identifiant de noeud une adresse de socket serveur
-	 * ou l'on peut le contacter.
-	 */
-	final private Map<UInt, InetSocketAddress> directory;
-
-	/**
 	 * Crée et initialise un objet de gestion du réseau pour un noeud donné.
-	 * 
-	 * @param me
-	 *            Un couple associant l'identifiant du noeud à son adresse et
-	 *            port d'écoute de son serveur.
 	 */
-	NetworkTCP(Couple me) {
-		this(me, me);
-	}
-
-	/**
-	 * Crée et initialise un objet de gestion du réseau pour un noeud donné.
-	 * 
-	 * @param me
-	 *            Un couple associant l'identifiant du noeud à son adresse et
-	 *            port d'écoute de son serveur.
-	 * @param firstNode
-	 *            Le triplet adresse/port/identifiant du premier noeud auquel le
-	 *            noeud courant va se connecter.
-	 */
-	NetworkTCP(Couple me, Couple firstNode) {
-		this.me = me;
+	public NetworkTCP() {
+		node = null;
+		selector = null;
 		nextId = null;
 		nextChannel = null;
-		// queue = new ArrayList<E>();
-		directory = new HashMap<UInt, InetSocketAddress>();
-		directory.put(firstNode.getId(), firstNode.getAddr());
-		directory.put(me.getId(), me.getAddr());
 		pendingConnections = new LinkedList<SocketChannel>();
-		node = null;
 	}
 
 	/**
@@ -107,7 +73,7 @@ public class NetworkTCP implements INetwork {
 			// Non bloquante
 			ssChan.configureBlocking(false);
 			// Acquisition de l'adresse socket
-			ssChan.socket().bind(me.getAddr());
+			ssChan.socket().bind(narrowToNetworkId(node.getId()).getAddress());
 			// Enregistre notre serveur
 			ssChan.register(selector, SelectionKey.OP_ACCEPT);
 			this.node = node;
@@ -230,23 +196,65 @@ public class NetworkTCP implements INetwork {
 	}
 
 	/**
+	 * Convertit un identifiant de noeud en identifiant de réseau TCP.
+	 * 
+	 * @param id
+	 *            L'identifiant de noeud à convertir.
+	 * @return L'identifiant TCP.
+	 * @throws BadNodeIdException
+	 *             Une exception est lancée si la convertion est impossible car
+	 *             l'identifiant passé en paramètre est du mauvais type.
+	 */
+	private static TCPId narrowToNetworkId(ANodeId id)
+			throws BadNodeIdException {
+		if (id instanceof TCPId)
+			return (TCPId) id;
+		else
+			throw new BadNodeIdException(id);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void openChannel(UInt id) throws NodeNotFoundException,
-			NetworkException {
+	public void sendTo(ANodeId id, AMessage message) throws NetworkException {
 
-		InetSocketAddress addr = directory.get(id);
-		if (addr == null)
-			throw new NodeNotFoundException(node, id);
+		if (gruickPrint)
+			System.out.println("Envoi de message hors bande : " + message
+					+ " de " + node.getId() + " à " + id);
+
+		SocketChannel next = null;
+		TCPId tcpId = narrowToNetworkId(id);
+
+		message.setSource(node.getId());
+		
+		try {
+			next = SocketChannel.open(tcpId.getAddress());
+			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
+					message));
+		} catch (IOException e) {
+			throw new NetworkException(e);
+		} finally {
+			Tools.close(next);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void openChannel(ANodeId id) throws NetworkException,
+			BadNodeIdException {
 
 		try {
+			TCPId tcpId = narrowToNetworkId(id);
+
 			if (nextChannel != null)
 				throw new IllegalStateException("Channel is already open.");
-			nextChannel = SocketChannel.open(addr);
-			nextId = id;
-			writeObject(nextChannel, new NetworkMessage(Type.OPEN_CHANNEL,
-					null, me));
+			nextChannel = SocketChannel.open(tcpId.getAddress());
+			nextId = tcpId;
+			writeObject(nextChannel,
+					new NetworkMessage(Type.OPEN_CHANNEL, null));
 		} catch (IOException e) {
 			Tools.close(nextChannel);
 			nextChannel = null;
@@ -259,10 +267,10 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void closeChannel(UInt id) throws ChannelNotFoundException,
+	public void closeChannel(ANodeId id) throws ChannelNotFoundException,
 			NetworkException {
 
-		if (nextId == null || nextId != id)
+		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
 		try {
@@ -281,41 +289,13 @@ public class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendTo(UInt id, AMessage message) throws NodeNotFoundException,
-			NetworkException {
-
-		if (gruickPrint)
-			System.out.println("Envoi de message hors bande : " + message
-					+ " de " + node.getId() + " à " + id);
-
-		SocketChannel next = null;
-		InetSocketAddress addr = directory.get(id);
-		if (addr == null)
-			throw new NodeNotFoundException(node, id);
-
-		message.setSource(node.getId());
-
-		try {
-			next = SocketChannel.open(addr);
-			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
-					message, me));
-			Tools.close(next);
-		} catch (IOException e) {
-			Tools.close(next);
-			throw new NetworkException(e);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendInChannel(UInt id, AMessage message)
+	public void sendInChannel(ANodeId id, AMessage message)
 			throws ChannelNotFoundException, NetworkException {
 
 		if (gruickPrint)
-			System.out.println("nextId. "  + nextId + "Envoi de message in bande : " + message
-					+ " de " + node.getId() + " à " + id);
+			System.out.println("nextId. " + nextId
+					+ "Envoi de message in bande : " + message + " de "
+					+ node.getId() + " à " + id);
 
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
@@ -325,77 +305,6 @@ public class NetworkTCP implements INetwork {
 		try {
 			writeObject(nextChannel, new NetworkMessage(
 					Type.MESSAGE_IN_CHANNEL, message));
-		} catch (IOException e) {
-			throw new NetworkException(e);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendInChannel(UInt id, MessageAskConnection message)
-			throws NodeNotFoundException, ChannelNotFoundException,
-			NetworkException {
-
-		if (gruickPrint)
-			System.out.println("Envoi de message in bande : " + message
-					+ " de " + node.getId() + " à " + id);
-
-		if (nextId == null || nextId != id)
-			throw new ChannelNotFoundException(node, id);
-
-		message.setSource(node.getId());
-
-		try {
-			// Recherche de l'adresse réseau du noeud émetteur de la demande
-			InetSocketAddress addr = directory.get(message.getOriginalSource());
-			if (addr == null)
-				throw new NodeNotFoundException(node,
-						message.getOriginalSource());
-
-			// On transmet l'adresse réseau du noeud émetteur auquel le neoud
-			// récepteur pourra éventuellement répondre plus tard
-			Couple couple = new Couple(message.getOriginalSource(), addr);
-			writeObject(nextChannel, new NetworkMessage(
-					Type.MESSAGE_IN_CHANNEL, message, me, couple));
-
-		} catch (IOException e) {
-			throw new NetworkException(e);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendInChannel(UInt id, MessageConnectTo message)
-			throws NodeNotFoundException, ChannelNotFoundException,
-			NetworkException {
-
-		if (gruickPrint)
-			System.out.println("Envoi de message in bande : " + message
-					+ " de " + node.getId() + " à " + id);
-
-		if (nextId == null || nextId != id)
-			throw new ChannelNotFoundException(node, id);
-
-		message.setSource(node.getId());
-
-		try {
-			// Recherche de l'adresse réseau du noeud à qui le récepteur du
-			// message doit se connecter
-			InetSocketAddress addr = directory.get(message.getConnectNodeId());
-			if (addr == null)
-				throw new NodeNotFoundException(node,
-						message.getOriginalSource());
-
-			// On transmet l'adresse réseau du noeud auquel le neoud
-			// récepteur devra se connecter
-			Couple couple = new Couple(message.getConnectNodeId(), addr);
-			writeObject(nextChannel, new NetworkMessage(
-					Type.MESSAGE_IN_CHANNEL, message, me, couple));
-
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		}
@@ -479,35 +388,6 @@ public class NetworkTCP implements INetwork {
 				} else {
 					throw new IllegalStateException("Invalid key");
 				}
-
-				// Ajout des identifiants supplémentaires dans notre
-				// dictionnaire
-				for (Couple c : netMsg.getCouples()) {
-					directory.put(c.getId(), c.getAddr());
-				}
-			}
-			/*
-			 * try { Thread.sleep(250); } catch (InterruptedException e) { //
-			 * TODO Auto-generated catch block e.printStackTrace(); }
-			 */
-
-			if (true || msg instanceof MessagePing) {
-
-				String str = "\n";
-				str += "id: " + node.getId() + " ";
-				str += "etat: " + node.getState() + " ";
-				// str += "directory : " + directory + "\n";
-				// str += "nextId : " + nextId + "\n";
-				// str += "nextChannel : " + nextChannel + "\n";
-				// str += "nb selectors " + selector.keys().size() + "\n";
-				// str += "OriginalSource " + msg.getOriginalSource() + "\n";
-				// str += "Source " + msg.getSource() + "\n";
-				str += " recoit un MSG " + msg.toString().split("@")[0] + " ";// msg.getClass().getName());
-				str += " de " + msg.getSource() + "\n";
-
-				if (gruickPrint)
-					System.out
-							.println(str);
 			}
 
 		} catch (IOException e) {

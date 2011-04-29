@@ -20,7 +20,7 @@ public class StateConnected extends ANodeState {
 
 	@Override
 	void process(MessageAskConnection msg) {
-		if (range.inRange(msg.getOriginalSource())) {
+		if (range.inRange(msg.getOriginalSource().getUid())) {
 			node.setState(new StateInsertingNext(inetwork, queue, node, range,
 					msg));
 		} else {
