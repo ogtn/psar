@@ -261,7 +261,7 @@ public class Main {
 
 			if (cpt == 0) {
 				for (Entry<UInt, Object> entry : data.entrySet()) {
-					nodes.get(0).put(entry.getValue(), entry.getKey());
+					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
 			cpt++;
@@ -291,7 +291,7 @@ public class Main {
 		data.put(new UInt(4000L), "4000");
 
 		for (Entry<UInt, Object> entry : data.entrySet()) {
-			nodes.get(0).put(entry.getValue(), entry.getKey());
+			nodes.get(0).put(entry.getKey(), entry.getValue());
 		}
 
 		try {
@@ -496,8 +496,8 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		//contigue(10);
-		random(10);
-		// cokeAndPut(10);
+		//random(10);
+		cokeAndPut(10);
 		// getMeIMFamous(10);
 		// leaveMyAss(2); TODO pq ce marche?
 		// leaveMyAss(5);
