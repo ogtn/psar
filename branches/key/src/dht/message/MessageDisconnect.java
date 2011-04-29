@@ -1,6 +1,6 @@
 package dht.message;
 
-import dht.UInt;
+import dht.ANodeId;
 
 /**
  * Message envoyé par l'<code>INode</code> précédente avant la fermeture d'un
@@ -17,7 +17,7 @@ public class MessageDisconnect extends AMessage {
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessageDisconnect(UInt originalSource) {
+	public MessageDisconnect(ANodeId originalSource) {
 		super(originalSource);
 	}
 }

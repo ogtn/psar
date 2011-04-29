@@ -33,7 +33,7 @@ public class StateConnectedWaitRange extends ANodeState {
 		// sinon on a un range du début jusqu'a la donnée le plus élevée.
 		// Alorq que les données sont potentiellement dans le noeud précédent
 		// qui ne nous les a pas encore envoyé.
-		range.setBegin(node.getId());
+		range.setBegin(node.getId().getUid());
 		node.setState(new StateConnected(inetwork, queue, node, range));
 	}
 }

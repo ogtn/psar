@@ -1,5 +1,6 @@
 package dht.message;
 
+import dht.ANodeId;
 import dht.UInt;
 
 /**
@@ -22,7 +23,7 @@ public class MessagePut extends AMessage {
 	 * @param key
 	 *            La clé de la donnée à ajouter dans la DHT.
 	 */
-	public MessagePut(UInt originalSource, Object data, UInt key) {
+	public MessagePut(ANodeId originalSource, Object data, UInt key) {
 		super(originalSource);
 		this.data = data;
 		this.key = key;

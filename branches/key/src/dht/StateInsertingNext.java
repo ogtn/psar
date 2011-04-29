@@ -54,7 +54,7 @@ public class StateInsertingNext extends ANodeState {
 	private void dataTransfer() {
 
 		// Première donnée à transférer
-		Data data = range.shrinkToLast(node.getNext());
+		Data data = range.shrinkToLast(node.getNext().getUid());
 
 		while (data != null) {
 			inetwork.sendInChannel(node.getNext(), new MessageDataRange(node
@@ -77,11 +77,11 @@ public class StateInsertingNext extends ANodeState {
 				// Je vais le traiter via un process
 				return;
 			}
-			data = range.shrinkToLast(node.getNext());
+			data = range.shrinkToLast(node.getNext().getUid());
 		}
 
 		// MAJ de la nouvelle plage
-		range.shrinkEnd(node.getNext());
+		range.shrinkEnd(node.getNext().getUid());
 
 		// Envoi du reste de la plage au suivant
 		inetwork.sendInChannel(node.getNext(), new MessageEndRange(

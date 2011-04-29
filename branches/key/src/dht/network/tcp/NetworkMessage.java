@@ -6,8 +6,7 @@ import dht.message.AMessage;
 
 /**
  * Classe chargée d'encapsuler les messages envoyés par le noeud dans des
- * messages réseaux afin d'assurer la diffusion des adresses IP et ports
- * nécessaires aux connections inter-noeuds.
+ * messages réseaux pour tagger les différents messages.
  */
 class NetworkMessage implements Serializable {
 
@@ -30,21 +29,13 @@ class NetworkMessage implements Serializable {
 	private final Type type;
 
 	/**
-	 * Couples devant être transmis entre les noeuds.
-	 */
-	private Couple[] couples;
-
-	/**
 	 * Crée et initialise un message réseau.
 	 * 
 	 * @param content
 	 *            Le message du noeud à encapsuler.
-	 * @param couples
-	 *            Les couples d'identifiant de noeuds/et d'identifiants réseaux
 	 */
-	NetworkMessage(Type type, AMessage content, Couple... couples) {
+	NetworkMessage(Type type, AMessage content) {
 		this.type = type;
-		this.couples = couples;
 		this.content = content;
 	}
 
@@ -58,7 +49,6 @@ class NetworkMessage implements Serializable {
 		return content;
 	}
 
-	// TODO
 	/**
 	 * Retourne le type de message
 	 * 
@@ -66,16 +56,6 @@ class NetworkMessage implements Serializable {
 	 */
 	public Type getType() {
 		return type;
-	}
-
-	/**
-	 * Retourne les couples d'identifiant de noeuds/et d'identifiants réseaux
-	 * transportés par le noeud.
-	 * 
-	 * @return Les couples d'identifiants.
-	 */
-	Couple[] getCouples() {
-		return couples;
 	}
 
 	/**
@@ -87,10 +67,6 @@ class NetworkMessage implements Serializable {
 		StringBuilder strBuild = new StringBuilder();
 
 		strBuild.append("\n==== NetworkMessage ===\n");
-		strBuild.append("Couples: \n");
-		for (Couple c : couples) {
-			strBuild.append("\t").append(c.toString()).append("\n");
-		}
 		strBuild.append("Content: ");
 		strBuild.append(content.toString());
 		strBuild.append("======================\n");
@@ -98,9 +74,3 @@ class NetworkMessage implements Serializable {
 		return strBuild.toString();
 	}
 }
-
-// OPEN_CONNECTION CONNECTED
-// CLOSE_CONNECTION CONNECTED
-// MESSAGE_IN_CONNECTION CONNECTED
-// MESSAGE_OUT_CONNECTION DISCONNECTED
-

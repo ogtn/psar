@@ -1,5 +1,6 @@
 package dht.message;
 
+import dht.ANodeId;
 import dht.UInt;
 
 /**
@@ -25,7 +26,7 @@ public class MessageData extends AMessage {
 	 * @param data
 	 *            La donnée transférée.
 	 */
-	public MessageData(UInt originalSource, UInt key, Object data) {
+	public MessageData(ANodeId originalSource, UInt key, Object data) {
 		super(originalSource);
 		this.key = key;
 		this.data = data;

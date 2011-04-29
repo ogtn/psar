@@ -1,5 +1,6 @@
 package dht.message;
 
+import dht.ANodeId;
 import dht.UInt;
 
 /**
@@ -24,7 +25,7 @@ public class MessageBeginRange extends AMessage {
 	 * @param beginRange
 	 *            La clé du nouveau début de la plage de données.
 	 */
-	public MessageBeginRange(UInt originalSource, UInt beginRange) {
+	public MessageBeginRange(ANodeId originalSource, UInt beginRange) {
 		super(originalSource);
 		this.beginRange = beginRange;
 	}

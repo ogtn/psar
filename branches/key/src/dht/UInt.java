@@ -15,7 +15,7 @@ public final class UInt implements Serializable {
 		private UInt uInt;
 
 		/**
-		 * Crée et initialise un conteneur modifable d'entier non signé.
+		 * Crée et initialise un conteneur modifiable d'entier non signé.
 		 * 
 		 * @param uInt
 		 *            L'entier non signé à l'intérieur du conteneur.
@@ -25,7 +25,7 @@ public final class UInt implements Serializable {
 		}
 
 		/**
-		 * Crée et initialise un conteneur modifable d'entier non signé.
+		 * Crée et initialise un conteneur modifiable d'entier non signé.
 		 * 
 		 * @param uInt
 		 *            L'entier non signé à l'intérieur du conteneur.
@@ -80,13 +80,28 @@ public final class UInt implements Serializable {
 		 * {@inheritDoc}
 		 */
 		@Override
+		public boolean equals(Object obj) {
+			return uInt.equals(obj);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int hashCode() {
+			return (int) (uInt.toLong() ^ (uInt.toLong() >>> 32));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
 		public String toString() {
 			return uInt != null ? uInt.toString() : "null";
 		}
 	}
 
 	private static final long serialVersionUID = 1L;
-	// TODO
 	final static long MAX_KEY = 4294967296L;
 	private final long uInt;
 
@@ -110,35 +125,39 @@ public final class UInt implements Serializable {
 	}
 
 	/**
-	 * Retourne le long représentant la clé.
+	 * Convertit la clé en long.
 	 * 
-	 * @return Le long représentant la clé.
+	 * @return Un long représentant la clé.
 	 */
 	public long toLong() {
 		return uInt;
 	}
 
 	/**
-	 * 
+	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean equals(Object obj) {
 		
-		if (obj == null)
-			return false;
-
 		if (obj instanceof UInt) {
-			UInt key = (UInt) obj;
-			return key.toLong() == uInt;
+			UInt uInt = (UInt) obj;
+			return uInt.toLong() == this.uInt;
+		}
+
+		if (obj instanceof MutableUInt) {
+			MutableUInt mUInt = (MutableUInt) obj;
+			return mUInt.toLong() == this.uInt;
 		}
 
 		return false;
 	}
 
-	// TODO
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int hashCode() {
-		return (int)(uInt ^ (uInt >>> 32));
+		return (int) (uInt ^ (uInt >>> 32));
 	}
 
 	/**
