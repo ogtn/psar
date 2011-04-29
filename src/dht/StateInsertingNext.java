@@ -16,6 +16,7 @@ import dht.message.MessagePut;
 public class StateInsertingNext extends ANodeState {
 
 	private final MessageAskConnection msg;
+	private UInt oldEndRange;
 
 	StateInsertingNext(INetwork inetwork, BlockingQueue<AMessage> queue,
 			Node node, Range range, MessageAskConnection msg) {
@@ -24,68 +25,76 @@ public class StateInsertingNext extends ANodeState {
 	}
 
 	@Override
-	void run() {
+	void init() {
 
-		try {
-			inetwork.sendInChannel(node.getNext(),
-					new MessageDisconnect(node.getId()));
-			inetwork.closeChannel(node.getNext());
-			
-			// Etablissement de la connection
-			inetwork.openChannel(msg.getOriginalSource());
-			//node.setNext(msg.getOriginalSource());
+		// Déconnexion du suivant
+		inetwork.sendInChannel(node.getNext(),
+				new MessageDisconnect(node.getId()));
+		inetwork.closeChannel(node.getNext());
 
-			// Envoi du suivant de la connection
-			inetwork.sendInChannel(msg.getOriginalSource(),
-					new MessageConnectTo(node.getId(), node.getNext()));
+		// Etablissement de la connection vers le nouveau suivant
+		inetwork.openChannel(msg.getOriginalSource());
 
-			UInt endOfRange = range.getEnd();
+		// Envoi de l'ancien suivant à mon nouveau suivant pour reconnexion
+		inetwork.sendInChannel(msg.getOriginalSource(), new MessageConnectTo(
+				node.getId(), node.getNext()));
 
-			// TODO alternatif Transfert DATA
-			UInt dataDest = msg.getOriginalSource();
-			Data data = range.shrinkToLast(dataDest);
-			
-			String str = "";
-			
-			while (data != null) {
-				str+= "D";
-				inetwork.sendInChannel(
-						dataDest,
-						new MessageDataRange(node.getId(), data.getKey(), data
-								.getData(), endOfRange));
-				data = range.shrinkToLast(dataDest);
+		node.setNext(msg.getOriginalSource());
 
-				if (queue.isEmpty() == false) {
-					str += "C";
-					AMessage msg;
-					msg = queue.take();
-					
-					if (msg instanceof MessagePing) {
-						process((MessagePing) msg);
-					} else if (msg instanceof MessagePut) {
-						process((MessagePut) msg);
-					} else if (msg instanceof MessageGet) {
-						process((MessageGet) msg);
-					} /*else
-						System.err.println("Kernel panic dans "
-								+ this.getClass().getName() + " pr msg : '"
-								+ msg + "' node : [" + node + "]");*/
-				}
+		oldEndRange = range.getEnd();
+
+		// Commence le transfert des données
+		dataTransfer();
+	}
+
+	/**
+	 * Transfert au moins une donnée vers le nouveau suivant tant qu'un message
+	 * traitable n'est pas reçu.
+	 */
+	private void dataTransfer() {
+
+		// Première donnée à transférer
+		Data data = range.shrinkToLast(node.getNext());
+
+		while (data != null) {
+			inetwork.sendInChannel(
+					node.getNext(),
+					new MessageDataRange(node.getId(), data.getKey(), data
+							.getData(), oldEndRange));
+
+			// TODO filter is empty non bloquant
+			// Si j'ai reçu dans ma file un message que je peux traiter
+			if (queue.isEmpty() == false) {
+				// Je vais le traiter via un process
+				return;
 			}
-
-			System.out.println(str);
-			// Calcul de la nouvelle plage
-			range.shrinkEnd(dataDest);
-
-			// Envoi de la plage
-			inetwork.sendInChannel(dataDest, new MessageEndRange(node.getId(), endOfRange));
-
-			node.setNext(dataDest);
-
-			node.setState(new StateConnected(inetwork, queue, node, range));
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+
+		// MAJ de la nouvelle plage
+		range.shrinkEnd(node.getNext());
+
+		// Envoi du reste de la plage au suivant
+		inetwork.sendInChannel(node.getNext(), new MessageEndRange(
+				node.getId(), oldEndRange));
+
+		node.setState(new StateConnected(inetwork, queue, node, range));
+	}
+	
+	@Override
+	void process(MessageGet msg) {
+		super.process(msg);
+		dataTransfer();
+	}
+	
+	@Override
+	void process(MessagePut msg) {
+		super.process(msg);
+		dataTransfer();
+	}
+	
+	@Override
+	void process(MessagePing msg) {
+		super.process(msg);
+		dataTransfer();
 	}
 }

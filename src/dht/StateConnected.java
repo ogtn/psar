@@ -9,13 +9,9 @@ import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
 import dht.message.MessageDisconnect;
-import dht.message.MessageGet;
-import dht.message.MessagePing;
-import dht.message.MessagePut;
+import dht.message.MessageLeave;
 
 public class StateConnected extends ANodeState {
-
-	private boolean quit = false;
 
 	StateConnected(INetwork inetwork, BlockingQueue<AMessage> queue, Node node,
 			Range range) {
@@ -23,69 +19,51 @@ public class StateConnected extends ANodeState {
 	}
 
 	@Override
-	void run() {
-		try {
-			while (!quit) {
-				AMessage msg;
-				msg = queue.take();
-
-				if (msg instanceof MessageAskConnection) {
-					process((MessageAskConnection) msg);
-				} else if (msg instanceof MessageData) {
-					process((MessageData) msg);
-				} else if (msg instanceof MessagePing) {
-					process((MessagePing) msg);
-				} else if (msg instanceof MessageConnect) {
-					process((MessageConnect) msg);
-				} else if (msg instanceof MessagePut) {
-					process((MessagePut) msg);
-				} else if (msg instanceof MessageGet) {
-					process((MessageGet) msg);
-				} else if (msg instanceof MessageBeginRange) {
-					process((MessageBeginRange) msg);
-				} else if (msg instanceof MessageConnectTo) {
-					process((MessageConnectTo) msg);
-				} /*else
-					System.err.println("Kernel panic dans "
-							+ this.getClass().getName() + " pr msg : '" + msg
-							+ "' node : [" + node + "]");*/
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
 	void process(MessageAskConnection msg) {
 		if (range.inRange(msg.getOriginalSource())) {
 			node.setState(new StateInsertingNext(inetwork, queue, node, range,
 					msg));
-			quit = true;
 		} else {
 			inetwork.sendInChannel(node.getNext(), msg);
 		}
 	}
 
+	/**
+	 * On reçoit un message data qui nous indique que le noeud précédent se
+	 * déconnecte et nous envoie sa première donnée.
+	 */
+	@Override
 	void process(MessageData msg) {
 		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
 				range, msg));
-		quit = true;
 	}
 
+	/**
+	 * Notre précédent se déconnecte et n'a pas de donnée à nous envoyer. On
+	 * reçoit un message MessageBeginRange pour passer en déconnexion de noeud.
+	 */
 	@Override
 	void process(MessageBeginRange msg) {
 		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
 				range, msg));
-		quit = true;
 	}
 
+	/**
+	 * Notre précédent s'est déconnecté et le nouveau se connecte.
+	 */
 	@Override
 	void process(MessageConnect msg) {
 		node.setPrevious(msg.getSource());
 	}
 
+	/**
+	 * Mon successeur se déconnecte et me demande de me reconnecter à son
+	 * suivant.
+	 */
 	@Override
 	void process(MessageConnectTo msg) {
-		/* Mon précédent se déconnecte */
+
+		// TODO : Créer un état DiconnectingNext ???
 
 		inetwork.sendInChannel(node.getNext(),
 				new MessageDisconnect(node.getId()));
@@ -93,5 +71,11 @@ public class StateConnected extends ANodeState {
 		node.setNext(msg.getConnectNodeId());
 		inetwork.openChannel(node.getNext());
 		inetwork.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
+	}
+	
+	
+	@Override
+	public void process(MessageLeave msg) {
+		node.setState(new StateDisconnecting(inetwork, queue, node, range));
 	}
 }

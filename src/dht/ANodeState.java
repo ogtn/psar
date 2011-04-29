@@ -14,6 +14,7 @@ import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageError;
 import dht.message.MessageGet;
+import dht.message.MessageLeave;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
 
@@ -32,9 +33,10 @@ abstract class ANodeState {
 		this.range = range;
 	}
 
-	abstract void run();
-	
-	
+	void init() {
+	}
+
+	// abstract void run();
 
 	void process(MessageAskConnection msg) {
 	}
@@ -103,5 +105,19 @@ abstract class ANodeState {
 					+ node.getNext());
 			range.add(msg.getKey(), msg.getData());
 		}
+	}
+
+	public AMessage filter() {
+		try {
+			return queue.take();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void process(MessageLeave msg) {
+		// TODO illegal state exception
 	}
 }

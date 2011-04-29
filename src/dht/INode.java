@@ -12,7 +12,7 @@ public interface INode {
 
 	void ping();
 	
-	void put(Object data, UInt key);
+	void put(UInt key, Object data);
 	
 	void leave();
 	

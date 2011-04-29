@@ -374,7 +374,7 @@ public class Range {
 	 */
 	@Override
 	public String toString() {
-		//return "range[" + begin + ":" + end + "| data: " + data + "]";
-		return "range[" + begin + ":" + end;
+		return "range[" + begin + ":" + end + "| data: " + data + "]";
+		//return "range[" + begin + ":" + end;
 	}
 }
