@@ -17,7 +17,7 @@ class Main {
 			List<Thread> threads, List<Node> nodes) {
 
 		for (TCPId netId : ids) {
-			TCPId connectId = connectedNodes.get(netId.getUid());
+			TCPId connectId = connectedNodes.get(netId.getNumericID());
 			Node node = null;
 
 			if (connectId != null) {
@@ -88,9 +88,9 @@ class Main {
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).getUid(), null);
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -127,9 +127,9 @@ class Main {
 
 		for (int cpt = 0; cpt < ids.size(); cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).getUid(), null);
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -212,14 +212,14 @@ class Main {
 					new InetSocketAddress(1515 + cpt)));
 
 		for (TCPId id : ids)
-			System.out.println(id.getUid());
+			System.out.println(id.getNumericID());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).getUid(), null);
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -311,14 +311,14 @@ class Main {
 					new InetSocketAddress(1515 + cpt)));
 
 		for (TCPId id : ids)
-			System.out.println(id.getUid());
+			System.out.println(id.getNumericID());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).getUid(), null);
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 
@@ -402,14 +402,14 @@ class Main {
 					new InetSocketAddress(1515 + cpt)));
 
 		for (TCPId id : ids)
-			System.out.println(id.getUid());
+			System.out.println(id.getNumericID());
 		System.out.println("");
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
-				connectedNodes.put(ids.get(cpt).getUid(), ids.get(0));
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
 			else
-				connectedNodes.put(ids.get(cpt).getUid(), null);
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
 
 		init(ids, connectedNodes, threads, nodes);
 

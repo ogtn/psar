@@ -41,7 +41,7 @@ public class StateDisconnecting extends ANodeState {
 		if (dataTransfered)
 			return;
 
-		Data data = range.shrinkToLast(node.getId().getUid());
+		Data data = range.shrinkToLast(node.getId().getNumericID());
 
 		while (data != null) {
 			inetwork.sendInChannel(node.getNext(), new MessageData(

@@ -36,7 +36,7 @@ class TCPId extends ANodeId {
 	 * @return L'identifiant du noeud.
 	 */
 	@Override
-	public UInt getUid() {
+	public UInt getNumericID() {
 		return id;
 	}
 
@@ -56,10 +56,18 @@ class TCPId extends ANodeId {
 	public boolean equals(Object obj) {
 
 		if (obj instanceof TCPId) {
-			return ((TCPId) obj).getUid().equals(id);
+			return ((TCPId) obj).getNumericID().equals(id);
 		}
 
 		return false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return id.hashCode();
 	}
 
 	/**
