@@ -27,7 +27,7 @@ public abstract class ANodeId implements Serializable {
 	 * 
 	 * @return L'identifiant numérique du noeud.
 	 */
-	public UInt getUid() {
+	public UInt getNumericID() {
 		return id;
 	}
 
@@ -38,8 +38,17 @@ public abstract class ANodeId implements Serializable {
 	public boolean equals(Object obj) {
 
 		if (obj instanceof ANodeId) {
-			return ((ANodeId) obj).getUid().equals(id);
+			return ((ANodeId) obj).getNumericID().equals(id);
 		}
 		return false;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+	
 }

@@ -50,7 +50,7 @@ public class Node implements INode, Runnable {
 		this.id = id;
 		next = id;
 		previous = null;
-		range = new Range(id.getUid());
+		range = new Range(id.getNumericID());
 		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
