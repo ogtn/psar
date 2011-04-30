@@ -2,14 +2,16 @@ package dht.message;
 
 import java.io.Serializable;
 
+import dht.ANodeId;
+
 /**
  * Classe implémentant la notion de messages envoyés entre <code>INode</code>.
  */
 public abstract class AMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private final long originalSource;
-	private long source;
+	private final ANodeId originalSource;
+	private ANodeId source;
 
 	/**
 	 * Crée et initialise un message.
@@ -18,7 +20,7 @@ public abstract class AMessage implements Serializable {
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	AMessage(long originalSource) {
+	AMessage(ANodeId originalSource) {
 		source = this.originalSource = originalSource;
 	}
 
@@ -29,7 +31,7 @@ public abstract class AMessage implements Serializable {
 	 * @return L'identifiant de l'<code>INode</code> ayant originellement envoyé
 	 *         le message.
 	 */
-	public long getOriginalSource() {
+	public ANodeId getOriginalSource() {
 		return originalSource;
 	}
 
@@ -40,7 +42,7 @@ public abstract class AMessage implements Serializable {
 	 * @return L'identifiant de l'<code>INode</code> ayant originellement envoyé
 	 *         le message.
 	 */
-	public long getSource() {
+	public ANodeId getSource() {
 		return source;
 	}
 
@@ -51,7 +53,7 @@ public abstract class AMessage implements Serializable {
 	 * @param source
 	 *            Le nouvel identifiant de la dernière <code>INode</code>.
 	 */
-	public void setSource(long source) {
+	public void setSource(ANodeId source) {
 		this.source = source;
 	}
 }

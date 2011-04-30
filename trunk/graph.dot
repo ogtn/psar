@@ -1,0 +1,18 @@
+digraph
+{
+    graph [size = "10.67!", ratio = 1;
+    node [shape = record, style = filled, fillcolor = blue];
+    edge [shape = record, style = bold, arrowsize = 2, penwidth = 2];
+
+    a -> b -> c -> d -> e -> f -> g -> h;
+    h -> a;
+
+    a [label = "{42-1892|{42|486|1354|2154}}" ];
+    b [label = "{42-1892|{42|486|1354|2154}}" ];
+    c [label = "{42-1892|{42|486|1354|2154}}" ];
+    d [label = "{42-1892|{42|486|1354|2154}}" ];
+    e [label = "{42-1892|{42|486|1354|2154}}" ];
+    f [label = "{42-1892|{42|486|1354|2154}}" ];
+    g [label = "{42-1892|{42|486|1354|2154}}" ];
+    h [label = "{42-1892|{42|486|1354|2154}}" ];
+};
