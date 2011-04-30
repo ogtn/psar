@@ -1,5 +1,7 @@
 package dht.message;
 
+import dht.ANodeId;
+
 /**
  * Message de demande d'insertion envoyé par une <code>INode</code> à un membre
  * quelconque de l'anneau pour routage et insertion de ladite <code>INode</code>
@@ -16,7 +18,7 @@ public class MessageAskConnection extends AMessage {
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessageAskConnection(long originalSource) {
+	public MessageAskConnection(ANodeId originalSource) {
 		super(originalSource);
 	}
 }

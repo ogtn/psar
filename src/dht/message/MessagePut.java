@@ -1,5 +1,8 @@
 package dht.message;
 
+import dht.ANodeId;
+import dht.UInt;
+
 /**
  * Message envoyé à une <code>Inode</code> pour stocker une donnée dans la DHT.
  */
@@ -7,7 +10,7 @@ public class MessagePut extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 	private Object data;
-	private long key;
+	private UInt key;
 
 	/**
 	 * Crée et initialise un message de stockage de donnée.
@@ -20,7 +23,7 @@ public class MessagePut extends AMessage {
 	 * @param key
 	 *            La clé de la donnée à ajouter dans la DHT.
 	 */
-	public MessagePut(long originalSource, Object data, long key) {
+	public MessagePut(ANodeId originalSource, Object data, UInt key) {
 		super(originalSource);
 		this.data = data;
 		this.key = key;
@@ -40,7 +43,7 @@ public class MessagePut extends AMessage {
 	 * 
 	 * @return La clé ajoutée dans la DHT.
 	 */
-	public long getKey() {
+	public UInt getKey() {
 		return key;
 	}
 }

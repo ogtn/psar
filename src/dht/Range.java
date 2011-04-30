@@ -1,33 +1,19 @@
 package dht;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Map.Entry;
+
+import dht.UInt.MutableUInt;
 
 public class Range {
 
-	private static class Longer {
-		public long longer;
-
-		private Longer(long longer) {
-			this.longer = longer;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(longer);
-		}
-	}
-
 	public static class Data {
-		private long key;
+		private UInt key;
 		private Object data;
 
-		public Data(long key, Object data) {
+		public Data(UInt key, Object data) {
 			this.key = key;
 			this.data = data;
 		}
@@ -36,16 +22,14 @@ public class Range {
 			return data;
 		}
 
-		public long getKey() {
+		public UInt getKey() {
 			return key;
 		}
 	}
 
-	public final static long MAX_KEY = 4294967296L;
-	
-	private final Longer begin, end;
-	private final TreeMap<Long, Object> data;
-	private final Map<Long, Object> unmodifiableData;
+	private final MutableUInt begin, end;
+	private final TreeMap<UInt, Object> data;
+	private final Map<UInt, Object> unmodifiableData;
 
 	/**
 	 * Crée et initialise une plage de données vide.
@@ -53,25 +37,31 @@ public class Range {
 	 * @param key
 	 *            La clé utilisée pour le début de la plage.
 	 */
-	public Range(long key, boolean isNotAlone) {
-		checkUnsignedInt(key);
-		begin = new Longer(key);
-		end = new Longer(-1);
+	public Range() {
 
-		data = new TreeMap<Long, Object>(new Comparator<Long>() {
+		begin = new MutableUInt(null);
+		end = new MutableUInt(null);
+
+		data = new TreeMap<UInt, Object>(new Comparator<UInt>() {
 			@Override
-			public int compare(Long keyOne, Long keyTwo) {
+			public int compare(UInt keyOne, UInt keyTwo) {
+
+				if (isNotEmptyRange() == false)
+					throw new IllegalStateException("Range is empty");
+
+				long tmpKeyOne = keyOne.toLong();
+				long tmpKeyTwo = keyTwo.toLong();
 
 				if (keyOne.equals(keyTwo))
 					return 0;
 
-				if (keyOne >= 0 && keyOne <= end.longer)
-					keyOne += MAX_KEY;
+				if (tmpKeyOne >= 0 && tmpKeyOne <= end.toLong())
+					tmpKeyOne = UInt.MAX_KEY + tmpKeyOne;
 
-				if (keyTwo >= 0 && keyTwo <= end.longer)
-					keyTwo += MAX_KEY;
+				if (tmpKeyTwo >= 0 && tmpKeyTwo <= end.toLong())
+					tmpKeyTwo = UInt.MAX_KEY + tmpKeyTwo;
 
-				return keyOne - keyTwo < 0 ? -1 : 1;
+				return tmpKeyOne - tmpKeyTwo < 0 ? -1 : 1;
 			}
 		});
 
@@ -84,17 +74,10 @@ public class Range {
 	 * @param key
 	 *            La clé utilisée pour le début de la plage.
 	 */
-	public Range(long key) {
-		this(key, true);
-		begin.longer = key;
-		end.longer = (key - 1 + MAX_KEY) % MAX_KEY;
-	}
-
-	private static void checkUnsignedInt(long key) {
-		if (key < 0)
-			throw new IndexOutOfBoundsException("negativ key : " + key);
-		if (key > MAX_KEY)
-			throw new IndexOutOfBoundsException("key too large");
+	public Range(UInt key) {
+		this();
+		begin.setUInt(key);
+		end.setUInt((key.toLong() - 1 + UInt.MAX_KEY) % UInt.MAX_KEY);
 	}
 
 	/**
@@ -109,35 +92,33 @@ public class Range {
 	 * @return <code>true</code> si la clé est dans la plage de données,
 	 *         <code>false</code> sinon.
 	 */
-	private static boolean inRange(long begin, long end, long key) {
-		checkUnsignedInt(begin);
-		checkUnsignedInt(end);
-		checkUnsignedInt(key);
+	private static boolean inRange(UInt begin, UInt end, UInt key) {
 
 		// Plage vide
-		if (end == -1)
+		if (end == null || begin == null)
 			return false;
 
 		// Pas de bouclage
-		if (begin <= end)
-			return key >= begin && key <= end;
+		if (begin.toLong() <= end.toLong())
+			return key.toLong() >= begin.toLong()
+					&& key.toLong() <= end.toLong();
 
 		// Bouclage : comparaison en deux parties
-		if (key >= begin && key < MAX_KEY)
+		if (key.toLong() >= begin.toLong() && key.toLong() < UInt.MAX_KEY)
 			return true;
-		if (key >= 0 && key <= end)
+		if (key.toLong() >= 0 && key.toLong() <= end.toLong())
 			return true;
 
 		return false;
 	}
 
 	/**
-	 * Test si la plage de données courante est valide.
+	 * Test si la plage de données courante est vide.
 	 * 
-	 * @return <true> si la plage est valide, <false> sinon.
+	 * @return <true> si la plage n'est pas vide, <false> sinon.
 	 */
-	private boolean isValidRange() {
-		return end.longer != -1;
+	private boolean isNotEmptyRange() {
+		return end.getUInt() != null && begin.getUInt() != null;
 	}
 
 	/**
@@ -151,13 +132,10 @@ public class Range {
 	 * @throws IndexOutOfBoundsException
 	 *             Une exception est lancée si la plage est invalide.
 	 */
-	private void check(long newBegin, long newEnd)
+	private void check(UInt newBegin, UInt newEnd)
 			throws IndexOutOfBoundsException {
 
-		checkUnsignedInt(newEnd);
-		checkUnsignedInt(newBegin);
-
-		if (data.isEmpty() || isValidRange() == false)
+		if (data.isEmpty() || isNotEmptyRange() == false)
 			return;
 
 		if (inRange(newBegin, newEnd, data.firstKey()) == false)
@@ -178,8 +156,10 @@ public class Range {
 	 * @return <code>true</code> si la clé est dans la plage de données,
 	 *         <code>false</code> sinon.
 	 */
-	boolean inRange(long key) {
-		return inRange(begin.longer, end.longer, key);
+	boolean inRange(UInt key) {
+		assert key != null : "nullable key";
+
+		return inRange(begin.getUInt(), end.getUInt(), key);
 	}
 
 	/**
@@ -190,7 +170,11 @@ public class Range {
 	 * @param data
 	 *            La donnée à ajouter.
 	 */
-	void add(long key, Object data) {
+	void add(UInt key, Object data) {
+
+		assert key != null : "nullable key";
+		assert data != null : "nullable data";
+
 		if (!inRange(key))
 			throw new IndexOutOfBoundsException("Ajout impossible: la clé "
 					+ key + " n'est pas dans le " + toString());
@@ -206,9 +190,32 @@ public class Range {
 	 * @param data
 	 *            La donnée à ajouter.
 	 */
-	void addExtend(long key, Object data) {
+	void addExtend(UInt key, Object data) {
+
+		assert key != null : "nullable key";
+		assert data != null : "nullable data";
+
 		if (inRange(key) == false)
-			end.longer = key;
+			end.setUInt(key);
+
+		this.data.put(key, data);
+	}
+
+	/**
+	 * Ajoute une donnée au début de la plage, en l'étendant si nécessaire.
+	 * 
+	 * @param key
+	 *            La clé de la donnée à ajouter.
+	 * @param data
+	 *            La donnée à ajouter.
+	 */
+	public void insertExtend(UInt key, Object data) {
+
+		assert key != null : "nullable key";
+		assert data != null : "nullable data";
+
+		if (inRange(key) == false)
+			begin.setUInt(key);
 
 		this.data.put(key, data);
 	}
@@ -221,8 +228,7 @@ public class Range {
 	 * @return La donnée recherchée ou <code>null</code> si aucune donnée ne
 	 *         correspond à la clé.
 	 */
-	Object get(long key) {
-		checkUnsignedInt(key);
+	Object get(UInt key) {
 		return data.get(key);
 	}
 
@@ -231,7 +237,7 @@ public class Range {
 	 * 
 	 * @return une vue non modifiable des données.
 	 */
-	Map<Long, Object> getData() {
+	Map<UInt, Object> getData() {
 		return unmodifiableData;
 	}
 
@@ -253,10 +259,19 @@ public class Range {
 	 *             Une exception est lancée si on tente de rétrécir la plage
 	 *             alors qu'une donnée est présente dans l'intervalle rétrécit.
 	 */
-	void shrinkEnd(long end) throws IndexOutOfBoundsException {
-		long tmpEnd = (end - 1 + MAX_KEY) % MAX_KEY;
-		check(begin.longer, tmpEnd);
-		this.end.longer = tmpEnd;
+	void shrinkEnd(UInt end) throws IndexOutOfBoundsException {
+
+		assert end != null : "nullable key";
+
+		if (data.comparator().compare(end, begin.getUInt()) == 0) {
+			begin.setUInt((Long)null);
+			this.end.setUInt((Long)null);
+		} else {
+			UInt tmpEnd = new UInt((end.toLong() - 1 + UInt.MAX_KEY)
+					% UInt.MAX_KEY);
+			check(begin.getUInt(), tmpEnd);
+			this.end.setUInt(tmpEnd);
+		}
 	}
 
 	/**
@@ -289,13 +304,15 @@ public class Range {
 	 *            La clé après laquelle on retire les données plus grandes.
 	 * @return La donnée retirée ou <code>null</code> si il y'en a pas.
 	 */
-	Data shrinkToLast(long key) {
-		checkUnsignedInt(key);
+	Data shrinkToLast(UInt key) {
 
-		if (data.size() == 0 || isValidRange() == false)
+		assert key != null : "nullable key";
+
+		if (data.size() == 0 || isNotEmptyRange() == false
+				|| inRange(key) == false)
 			return null;
 
-		Long tmpKey = data.lastKey();
+		UInt tmpKey = data.lastKey();
 		Data res = null;
 
 		if (data.comparator().compare(tmpKey, key) >= 0) {
@@ -311,8 +328,8 @@ public class Range {
 	 * 
 	 * @return La fin de la plage.
 	 */
-	long getEnd() {
-		return end.longer;
+	UInt getEnd() {
+		return end.getUInt();
 	}
 
 	/**
@@ -321,9 +338,12 @@ public class Range {
 	 * @param end
 	 *            La nouvelle fin de la plage.
 	 */
-	void setEnd(long end) {
-		check(begin.longer, end);
-		this.end.longer = end;
+	void setEnd(UInt end) {
+
+		assert end != null : "nullable key";
+
+		check(begin.getUInt(), end);
+		this.end.setUInt(end);
 	}
 
 	/**
@@ -331,8 +351,8 @@ public class Range {
 	 * 
 	 * @return Le nouveau début de la plage.
 	 */
-	long getBegin() {
-		return begin.longer;
+	UInt getBegin() {
+		return begin.getUInt();
 	}
 
 	/**
@@ -341,9 +361,12 @@ public class Range {
 	 * @param begin
 	 *            Le nouveau début de la plage.
 	 */
-	void setBegin(long begin) {
-		check(begin, end.longer);
-		this.begin.longer = begin;
+	void setBegin(UInt begin) {
+
+		assert begin != null : "nullable key";
+
+		check(begin, end.getUInt());
+		this.begin.setUInt(begin);
 	}
 
 	/**
@@ -351,6 +374,7 @@ public class Range {
 	 */
 	@Override
 	public String toString() {
-		return "range[" + begin + ":" + end + "| data: " + data.size() + "]";
+		return "range[" + begin + ":" + end + "| data: " + data + "]";
+		//return "range[" + begin + ":" + end;
 	}
 }

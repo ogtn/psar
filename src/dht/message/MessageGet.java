@@ -1,13 +1,16 @@
 package dht.message;
 
+import dht.ANodeId;
+import dht.UInt;
+
 /**
- * Message envoyé à une <code>Inode</code> pour récupérer une donnée dans la
+ * Message envoyé à une <code>INode</code> pour récupérer une donnée dans la
  * DHT.
  */
 public class MessageGet extends AMessage {
 
 	private static final long serialVersionUID = 1L;
-	private long key;
+	private UInt key;
 
 	/**
 	 * Crée et initialise un message de demande de donnée.
@@ -18,7 +21,7 @@ public class MessageGet extends AMessage {
 	 * @param key
 	 *            La clé de la donnée demandée.
 	 */
-	public MessageGet(long originalSource, long key) {
+	public MessageGet(ANodeId originalSource, UInt key) {
 		super(originalSource);
 		this.key = key;
 	}
@@ -28,7 +31,7 @@ public class MessageGet extends AMessage {
 	 * 
 	 * @return La clé de la donnée demandée.
 	 */
-	public long getKey() {
+	public UInt getKey() {
 		return key;
 	}
 }

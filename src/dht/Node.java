@@ -3,44 +3,37 @@ package dht;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-import dht.Range.Data;
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageBeginRange;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
+import dht.message.MessageData;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageGet;
+import dht.message.MessageLeave;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
 
-
-// TODO com
 /**
  * Implémentation concrète d'un noeud de l'application.
  */
 public class Node implements INode, Runnable {
 
-	/**
-	 * Etat interne du noeud.
-	 */
-
-	private enum Status {
-		DISCONNECTED, CONNECTING, DISCONNECTING, RUN, CONNECTING_NEXT
-	};
-
-	private long id;
-	private Status status;
-	private INetwork inetwork;
-	private long next;
-	private long previous;
-	private Range range;
+	private final ANodeId id;
+	private final INetwork inetwork;
+	private ANodeId next;
+	private ANodeId previous;
+	private final Range range;
+	private ANodeState state;
+	private final BlockingQueue<AMessage> queue;
 
 	/**
-   *
 	 * Crée et intialise un noeud déconnecté de tout voisin.
 	 * 
 	 * @param inetwork
@@ -49,10 +42,16 @@ public class Node implements INode, Runnable {
 	 * @param id
 	 *            Identifiant du noeud.
 	 */
-	public Node(INetwork inetwork, long id) {
+	public Node(INetwork inetwork, ANodeId id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
-		this(inetwork, id, id);
-		range = new Range(id);
+
+		queue = new ArrayBlockingQueue<AMessage>(42);
+		this.inetwork = inetwork;
+		this.id = id;
+		next = id;
+		previous = null;
+		range = new Range(id.getNumericID());
+		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
 	/**
@@ -67,20 +66,21 @@ public class Node implements INode, Runnable {
 	 *            Identifiant du premier noeud auquel le noeud devra se
 	 *            connecter.
 	 */
-	public Node(INetwork inetwork, long id, long firstNode) {
+	public Node(INetwork inetwork, ANodeId id, ANodeId firstNode) {
+		queue = new ArrayBlockingQueue<AMessage>(42);
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
-		previous = -1;
-		status = Status.DISCONNECTED;
-		range = new Range(id, false);
+		previous = null;
+		range = new Range();
+		state = new StateDisconnected(inetwork, queue, this, range);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public long getId() {
+	public ANodeId getId() {
 		return id;
 	}
 
@@ -89,204 +89,107 @@ public class Node implements INode, Runnable {
 	 */
 	@Override
 	public void run() {
-
 		// Initialisation de la couche réseau
 		inetwork.init(this);
+		new Thread() {
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						queue.put(inetwork.receive());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
 
-		// Je suis le premier noeud
-		if (next == id) {
-			inetwork.sendTo(next, new MessageConnect(id));
-		}
+		// Je me connecte
+		setState(new StateConnecting(inetwork, queue, this, range));
 
-		// Envoi du message de demande de connection
-		inetwork.sendTo(next, new MessageAskConnection(id));
+		// On sort quand on arrive dans l'état déconnecté
+		while (!(state instanceof StateDisconnected)) {
+			AMessage msg;
 
-		// Status en demande de connection
-		status = Status.CONNECTING;
-
-		/*
-		 * Filter macFilter = null; Filter mctFilter = null; Filter mcFilter =
-		 * null;
-		 * 
-		 * // Noeud seul if (id == next) { macFilter =
-		 * MessageAskConnection.getFilter(id); mctFilter =
-		 * MessageConnectTo.getFilter(id); mcFilter =
-		 * MessageConnect.getFilter(id); filters.add(macFilter);
-		 * filters.add(mctFilter); filters.add(mcFilter); } else {
-		 * filters.add(MessageConnectTo.getFilter()); }
-		 */
-
-		while (true) {
-			AMessage msg = inetwork.receive();
+			// Selon l'état on filtre les messages que l'on peut traiter
+			// les autres sont laissés dans la file
+			msg = state.filter();
 
 			if (msg instanceof MessageAskConnection) {
-				process((MessageAskConnection) msg);
-				// filters.remove(macFilter);
-			} else if (msg instanceof MessageConnect) {
-				process((MessageConnect) msg);
-				// filters.remove(mcFilter);
-			} else if (msg instanceof MessageConnectTo) {
-				process((MessageConnectTo) msg);
-				// filters.remove(mctFilter);
+				state.process((MessageAskConnection) msg);
+			} else if (msg instanceof MessageData) {
+				state.process((MessageData) msg);
 			} else if (msg instanceof MessagePing) {
-				route((MessagePing) msg);
-			} else if (msg instanceof MessageEndRange) {
-				process((MessageEndRange) msg);
+				state.process((MessagePing) msg);
+			} else if (msg instanceof MessageConnect) {
+				state.process((MessageConnect) msg);
 			} else if (msg instanceof MessagePut) {
-				process((MessagePut) msg);
-			} else if (msg instanceof MessageDataRange) {
-				process((MessageDataRange) msg);
+				state.process((MessagePut) msg);
 			} else if (msg instanceof MessageGet) {
-				process((MessageGet) msg);
+				state.process((MessageGet) msg);
 			} else if (msg instanceof MessageBeginRange) {
-				process((MessageBeginRange) msg);
+				state.process((MessageBeginRange) msg);
+			} else if (msg instanceof MessageConnectTo) {
+				state.process((MessageConnectTo) msg);
+			} else if (msg instanceof MessageDisconnect) {
+				state.process((MessageDisconnect) msg);
+			} else if (msg instanceof MessageDataRange) {
+				state.process((MessageDataRange) msg);
+			} else if (msg instanceof MessageEndRange) {
+				state.process((MessageEndRange) msg);
+			} else if (msg instanceof MessageLeave) {
+				state.process((MessageLeave) msg);
 			} else
-				System.err
-						.println("[" + id + "] Kernel panic! " + status + msg);
+				System.err.println("Kernel panic dans "
+						+ this.getClass().getName() + " pr msg : '" + msg
+						+ "' node : [" + this + "]");
 		}
 	}
 
-	private void process(MessageBeginRange msg) {
-		range.setBegin(msg.getBegin());
-	}
+	// TODO synchronized
+	@Override
+	public void ping() {
 
-	private void process(MessageGet msg) {
-		if (range.inRange(msg.getKey())) {
-			Object tmpData = range.get(msg.getKey());
-
-			if (tmpData == null)
-				System.out.println("Fail : " + msg.getKey());
-			else
-				System.out.println("Ok : " + tmpData + " id: " + id);
-		} else
-			inetwork.sendTo(next, msg);
-	}
-
-	private void process(MessageDataRange msg) {
-		range.setEnd(msg.getEndRange());
-		range.addExtend(msg.getKey(), msg.getData());
-	}
-
-	private void process(MessageConnectTo msg) {
-		next = msg.getConnectNodeId();
-		inetwork.sendTo(next, new MessageConnect(id));
-		status = Status.RUN;
-	}
-
-	private void process(MessageConnect msg) {
-
-		if (msg.getSource() != msg.getOriginalSource())
-			throw new IllegalStateException("Oh shit §§§§§§§§§ FUUUUUUUUUUUUUU");
-
-		previous = msg.getSource();
-	}
-
-	private void process(MessageEndRange msg) {
-		System.out.println("endrange: " + msg.getEnd());
-		range.setEnd(msg.getEnd());
-		range.setBegin(id);
-	}
-
-	private void process(MessageAskConnection msg) {
-
-		if (msg.getOriginalSource() == id) {
-			next = msg.getOriginalSource();
-			return;
-		}
-
-		if (range.inRange(msg.getOriginalSource())) {
-			status = Status.CONNECTING_NEXT;
-
-			inetwork.sendTo(next, new MessageDisconnect(id));
-
-			// Etablissement de la connection
-			inetwork.sendTo(msg.getOriginalSource(), new MessageConnectTo(id,
-					next));
-
-			long endOfRange = range.getEnd();
-
-			// Transfert DATA
-			Data data = range.shrinkToLast(msg.getOriginalSource());
-			while (data != null) {
-				System.out.println(id + " envoi data " + data.getKey() + " à "
-						+ msg.getOriginalSource());
-				inetwork.sendTo(msg.getOriginalSource(), new MessageDataRange(
-						id, data.getKey(), data.getData(), endOfRange));
-				data = range.shrinkToLast(msg.getOriginalSource());
-			}
-
-			// Calcul de la nouvelle plage
-			range.shrinkEnd(msg.getOriginalSource());
-
-			// Envoi de la plage
-			inetwork.sendTo(msg.getOriginalSource(), new MessageEndRange(id,
-					endOfRange));
-			System.out.println(id + " envoi fin plage" + endOfRange + " à "
-					+ msg.getOriginalSource());
-
-			next = msg.getOriginalSource();
-		} else {
-			inetwork.sendTo(next, msg);
-		}
-	}
-
-	private void process(MessagePut msg) {
-		if (range.inRange(msg.getKey()) == false) {
-			System.out.println("Route MessagePut Data : " + msg.getKey());
-			inetwork.sendTo(next, msg);
-		} else
-			range.add(msg.getKey(), msg.getData());
-	}
-
-	private void route(MessagePing msg) {
-
-		Map<Long, Object> data = range.getData();
-		Iterator<Entry<Long, Object>> iter = data.entrySet().iterator();
+		Map<UInt, Object> data = range.getData();
+		Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
 		String out = "";
 
 		while (iter.hasNext()) {
-			Entry<Long, Object> entry = iter.next();
+			Entry<UInt, Object> entry = iter.next();
 			out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
 		}
 
-		System.out.println("Id: " + id + " " + range + "  " + out);
+		System.out.println("PING : " + this);
 
-		if (msg.getOriginalSource() != id)
-			inetwork.sendTo(next, msg);
+		inetwork.sendInChannel(next, new MessagePing(id));
 	}
 
 	// TODO synchronized
-	public void ping() {
-		inetwork.sendTo(next, new MessagePing(id));
-	}
-
-	// TODO synchronized
-	public void put(Object data, long key) {
-
+	@Override
+	public void put(UInt key, Object data) {
 		if (range.inRange(key))
 			range.add(key, data);
 		else
-			inetwork.sendTo(next, new MessagePut(id, data, key));
+			inetwork.sendInChannel(next, new MessagePut(id, data, key));
 	}
 
 	// TODO synchronized
+	@Override
 	public void leave() {
-
-		long beginRange = range.getBegin();
-
-		// Envoi du reste de la plage
-		inetwork.sendTo(next, new MessageBeginRange(id, beginRange));
-		System.out.println(id + " envoi debut plage" + beginRange + " à "
-				+ next);
-
-		inetwork.sendTo(next, new MessageDisconnect(id));
-		inetwork.sendTo(previous, new MessageConnectTo(id, next));
-		inetwork.sendTo(previous, new MessageDisconnect(id));
-
+		try {
+			queue.put(new MessageLeave(id));
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	// TODO synchronized
-	public void get(long key) {
+	@Override
+	public void get(UInt key) {
+		
+		// TODO dans a fr ds state
+		
 		if (range.inRange(key)) {
 			Object tmpData = range.get(key);
 
@@ -294,18 +197,52 @@ public class Node implements INode, Runnable {
 				System.out.println("Fail : " + key);
 			else
 				System.out.println("Ok : " + tmpData + " id: " + id);
-		} else
-			inetwork.sendTo(next, new MessageGet(id, key));
+		} else {
+			// System.out.println("Envoie de " + id + " GET a " + next);
+			inetwork.sendInChannel(next, new MessageGet(id, key));
+		}
 	}
 
-	@Override
 	public Range getRange() {
 		return range;
 	}
 
 	@Override
 	public String toString() {
-		return "id : " + id + "\nstatus : " + status + "\nnext " + next + "\n"
-				+ inetwork.toString();
+		return "id : '" + id + "' next '" + next + "' previous '" + previous
+				+ "' status: '" + state.getClass().getName() + "' " + range;
+	}
+
+	ANodeId getNext() {
+		return next;
+	}
+
+	void setNext(ANodeId next) {
+		this.next = next;
+	}
+
+	void setPrevious(ANodeId prev) {
+		previous = prev;
+	}
+
+	ANodeId getPrevious() {
+		return previous;
+	}
+
+	void setState(ANodeState state) {
+
+		/*
+		 * System.out.println("	Le noeud " + id + " passe de l'etat '" +
+		 * this.state.getClass().getName() + "' à '" +
+		 * state.getClass().getName() + "'");
+		 */
+
+		this.state = state;
+		this.state.init();
+	}
+	
+	// TODO delete
+	public String getState() {
+		return state.getClass().getName();
 	}
 }

@@ -1,10 +1,6 @@
 package dht;
 
 import dht.message.AMessage;
-import dht.message.MessageAskConnection;
-import dht.message.MessageConnect;
-import dht.message.MessageConnectTo;
-import dht.message.MessageDisconnect;
 
 /**
  * Interface implémentant la notion de couche réseau fournissant un ensemble de
@@ -32,25 +28,57 @@ public interface INetwork {
 	}
 
 	/**
-	 * Exception lancée lorsqu'un noeud du réseau ne peut communiquer avec un
-	 * autre car il ne le connait pas.
+	 * Exception lancée lorsque l'identifiant d'un noeud ne peut être converti
+	 * en identifiant de la couche réseau utilisée.
 	 */
-	public static class NodeNotFoundException extends RuntimeException {
+	public static class BadNodeIdException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+		private ANodeId nodeId;
+
+		/**
+		 * Crée et initialise une exception lancée suite à un problème de
+		 * conversion.
+		 * 
+		 * @param nodeId
+		 *            Le noeud que l'on a tenté de convertir.
+		 */
+		public BadNodeIdException(ANodeId nodeId) {
+			this.nodeId = nodeId;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public String toString() {
+			return super.toString()
+					+ "L'identifiant de la classe "
+					+ nodeId.getClass()
+					+ " n'est pas conforme à celui attendu par la classe réseau.";
+		}
+	}
+
+	/**
+	 * Exception lancée lorsqu'un noeud du réseau ne peut communiquer avec un
+	 * autre car aucun canal les reliants n'est ouvert.
+	 */
+	public static class ChannelNotFoundException extends RuntimeException {
 
 		private static final long serialVersionUID = 1L;
 		private INode sourceNode;
-		private long unknowNodeId;
+		private ANodeId unknowNodeId;
 
 		/**
-		 * Crée et initialise une exception indiquant qu'un noeud ne peut
-		 * communiquer avec un autre noeud.
+		 * Crée et initialise une exception indiquant qu'un canal n'est pas
+		 * ouvert.
 		 * 
 		 * @param sourceNode
-		 *            Le noeud source qui ne peut trouver le noeud.
+		 *            Le noeud source qui ne peut trouver le canal.
 		 * @param unknowNodeId
-		 *            Identifiant du noeud inconnu.
+		 *            Identifiant du noeud lié au canal inconnu.
 		 */
-		public NodeNotFoundException(INode sourceNode, long unknowNodeId) {
+		public ChannelNotFoundException(INode sourceNode, ANodeId unknowNodeId) {
 			this.sourceNode = sourceNode;
 			this.unknowNodeId = unknowNodeId;
 		}
@@ -61,7 +89,7 @@ public interface INetwork {
 		@Override
 		public String toString() {
 			return super.toString() + "Le noeud " + sourceNode.getId()
-					+ " ne connait pas l'id : " + unknowNodeId;
+					+ " n'a pas de cannal ouvert vers l'id : " + unknowNodeId;
 		}
 	}
 
@@ -77,94 +105,64 @@ public interface INetwork {
 	 */
 	void init(INode node) throws NetworkException;
 
-	// TODO
-	void sendTo(long id, AMessage message)
-			throws NodeNotFoundException, NetworkException;
-
 	/**
-	 * Envoie un message {@link MessageAskConnection} à un noeud.
+	 * Envoie un message à un noeud sans passer par un canal ouvert.
 	 * 
 	 * @param id
-	 *            Identifiant du noeud auquel on envoie le message.
+	 *            L'identifiant du noeud vers lequel on transmet le message.
 	 * @param message
-	 *            Le message envoyé.
-	 * @throws NodeNotFoundException
-	 *             Une exception est lancée si la couche réseau ne peut trouver
-	 *             le noeud à qui on envoie le message.
+	 *            Le message transmis.
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageAskConnection message)
-			throws NodeNotFoundException, NetworkException;
+	void sendTo(ANodeId id, AMessage message) throws NetworkException;
 
 	/**
-	 * Envoie un message {@link MessageConnect} à un noeud.
+	 * Ouvre un canal vers un noeud du réseau.
 	 * 
 	 * @param id
-	 *            Identifiant du noeud auquel on envoie le message.
-	 * @param message
-	 *            Le message envoyé.
-	 * @throws NodeNotFoundException
+	 *            L'identifiant du noeud vers lequel on ouvre le canal.
+	 * @throws NetworkException
+	 *             Une exception est lancée si une erreur interne à la couché
+	 *             réseau se produit.
+	 * @throws BadNodeIdException
+	 *             Une exception est lancée si l'implémentation de l'identifiant
+	 *             réseau n'est pas adapté à la couche réseau utilisée.
+	 */
+	void openChannel(ANodeId id) throws NetworkException, BadNodeIdException;
+
+	/**
+	 * Ferme un canal ouvert vers un noeud du réseau.
+	 * 
+	 * @param id
+	 *            L'identifiant du noeud vers lequel on ouvre le canal.
+	 * @throws ChannelNotFoundException
 	 *             Une exception est lancée si la couche réseau ne peut trouver
-	 *             le noeud à qui on envoie le message.
+	 *             le canal à fermer.
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageConnect message) throws NodeNotFoundException,
+	void closeChannel(ANodeId id) throws ChannelNotFoundException,
 			NetworkException;
 
 	/**
-	 * Envoie un message {@link MessageDisconnect} à un noeud.
+	 * Envoi un {@link AMessage} à un noeud sur un canal.
 	 * 
 	 * @param id
-	 *            Identifiant du noeud auquel on envoie le message.
+	 *            L'identifiant du noeud vers lequel on transmet le message.
 	 * @param message
 	 *            Le message envoyé.
-	 * @throws NodeNotFoundException
-	 *             Une exception est lancée si la couche réseau ne peut trouver
-	 *             le noeud à qui on envoie le message.
+	 * @throws ChannelNotFoundException
+	 *             Une exception est lancée si l'on ne peut trouver le canal
+	 *             associé au noeud destinataire.
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	void sendTo(long id, MessageDisconnect message)
-			throws NodeNotFoundException, NetworkException;
-
-	/**
-	 * Envoie un message {@link MessageConnectTo} à un noeud.
-	 * 
-	 * @param id
-	 *            Identifiant du noeud auquel on envoie le message.
-	 * @param message
-	 *            Le message envoyé.
-	 * @throws NodeNotFoundException
-	 *             Une exception est lancée si la couche réseau ne peut trouver
-	 *             le noeud à qui on envoie le message.
-	 * @throws NetworkException
-	 *             Une exception est lancée si une erreur interne à la couché
-	 *             réseau se produit.
-	 */
-	void sendTo(long id, MessageConnectTo message) throws NodeNotFoundException,
-			NetworkException;
-
-	/**
-	 * Envoie un message {@link MessagePing} à un noeud.
-	 * 
-	 * @param id
-	 *            Identifiant du noeud auquel on envoie le message.
-	 * @param message
-	 *            Le message envoyé.
-	 * @throws NodeNotFoundException
-	 *             Une exception est lancée si la couche réseau ne peut trouver
-	 *             le noeud à qui on envoie le message.
-	 * @throws NetworkException
-	 *             Une exception est lancée si une erreur interne à la couché
-	 *             réseau se produit.
-	 */
-	/*void sendTo(int id, MessagePing message) throws NodeNotFoundException,
-			NetworkException;*/
+	void sendInChannel(ANodeId id, AMessage message)
+			throws ChannelNotFoundException, NetworkException;
 
 	/**
 	 * Méthode bloquante permettant la récupération d'un message depuis la

@@ -3,21 +3,22 @@ package dht.message;
 import dht.ANodeId;
 
 /**
- * Message envoyé par l'<code>INode</code> précédente avant la fermeture d'un
- * lien inter-<code>INode</code>.
+ * Message envoyé à une <code>INode</code> pour lui demander de quitter
+ * l'anneau.
  */
-public class MessageDisconnect extends AMessage {
+public class MessageLeave extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Crée et initialise un message de déconnexion.
+	 * Crée et initialise un message demande à une <code>INode</code> de quitter
+	 * l'anneau.
 	 * 
 	 * @param originalSource
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessageDisconnect(ANodeId originalSource) {
+	public MessageLeave(ANodeId originalSource) {
 		super(originalSource);
 	}
 }

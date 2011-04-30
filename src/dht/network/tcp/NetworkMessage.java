@@ -4,32 +4,38 @@ import java.io.Serializable;
 
 import dht.message.AMessage;
 
-
 /**
  * Classe chargée d'encapsuler les messages envoyés par le noeud dans des
- * messages réseaux afin d'assurer la diffusion des adresses IP et ports
- * nécessaires aux connections inter-noeuds.
+ * messages réseaux pour tagger les différents messages.
  */
 class NetworkMessage implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private AMessage content;
-
 	/**
-	 * Couples devant être transmis entre les noeuds.
-	 */
-	private Couple[] couples;
+	 * Type de message
+	 * */
+	enum Type {
+		/* Lorsque l'on ouvre un canal */
+		OPEN_CHANNEL,
+		/* Lorsque l'on ferme un canal */
+		CLOSE_CHANNEL,
+		/* Lorsque l'on envoie un messsage via un canal */
+		MESSAGE_IN_CHANNEL,
+		/* Lorsque l'on envoie un messsage via un canal ouvert temporairement */
+		MESSAGE_OUT_CHANNEL
+	}
+
+	private static final long serialVersionUID = 1L;
+	private final AMessage content;
+	private final Type type;
 
 	/**
 	 * Crée et initialise un message réseau.
 	 * 
 	 * @param content
 	 *            Le message du noeud à encapsuler.
-	 * @param couples
-	 *            Les couples d'identifiant de noeuds/et d'identifiants réseaux
 	 */
-	NetworkMessage(AMessage content, Couple... couples) {
-		this.couples = couples;
+	NetworkMessage(Type type, AMessage content) {
+		this.type = type;
 		this.content = content;
 	}
 
@@ -44,13 +50,12 @@ class NetworkMessage implements Serializable {
 	}
 
 	/**
-	 * Retourne les couples d'identifiant de noeuds/et d'identifiants réseaux
-	 * transportés par le noeud.
+	 * Retourne le type de message
 	 * 
-	 * @return Les couples d'identifiants.
+	 * @return
 	 */
-	Couple[] getCouples() {
-		return couples;
+	public Type getType() {
+		return type;
 	}
 
 	/**
@@ -62,10 +67,6 @@ class NetworkMessage implements Serializable {
 		StringBuilder strBuild = new StringBuilder();
 
 		strBuild.append("\n==== NetworkMessage ===\n");
-		strBuild.append("Couples: \n");
-		for (Couple c : couples) {
-			strBuild.append("\t").append(c.toString()).append("\n");
-		}
 		strBuild.append("Content: ");
 		strBuild.append(content.toString());
 		strBuild.append("======================\n");
