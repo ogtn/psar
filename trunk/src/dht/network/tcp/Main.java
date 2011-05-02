@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
-import dht.UInt;
 import dht.Node;
+import dht.UInt;
 
 class Main {
 
@@ -38,9 +38,7 @@ class Main {
 		List<Node> nodes = new LinkedList<Node>();
 
 		for (int cpt = 0; cpt < n; cpt++)
-			ids
-					.add(new TCPId(new UInt(cpt), new InetSocketAddress(
-							1515 + cpt)));
+			ids.add(new TCPId(new UInt(cpt), new InetSocketAddress(1515 + cpt)));
 
 		for (int cpt = 0; cpt < n; cpt++)
 			if (cpt != 0)
@@ -52,14 +50,18 @@ class Main {
 
 		for (Thread t : threads) {
 			t.start();
-
-			try {
+			/*try {
 				t.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}
+			}*/
 		}
 
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		// TODO syncronizerdd
 		nodes.get(0).ping();
 
@@ -471,12 +473,17 @@ class Main {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		contigue(10);
-		//random(10);
-		//cokeAndPut(3);
-		//getMeIMFamous(10);
-		//leaveMyAss(2); TODO pq ce marche?
-		//leaveMyAss(5);
-		//coranAlternatif();
+		try {
+			contigue(10);
+			// random(10);
+			//cokeAndPut(3);
+			//getMeIMFamous(10);
+			// leaveMyAss(2); TODO pq ce marche?
+			//leaveMyAss(5);
+			// coranAlternatif();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 }

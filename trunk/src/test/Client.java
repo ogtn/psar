@@ -29,9 +29,9 @@ public class Client extends Thread {
 			
 			System.out.println("======= " + bufferObject.capacity());
 			
-			socketChannel.write(bufferObject);
+			//socketChannel.write(bufferObject);
 			
-			socketChannel.close();
+			//socketChannel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

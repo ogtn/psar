@@ -12,11 +12,11 @@ public class Main {
 		Client c1 = new Client();
 		c1.start();
 		c1.join();
-		
+		/*
 		Client c2 = new Client();
 		c2.start();
 		c2.join();
-		
+		*/
 		s.join();
 	}
 }

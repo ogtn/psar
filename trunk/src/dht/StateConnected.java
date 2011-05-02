@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -8,23 +8,33 @@ import dht.message.MessageBeginRange;
 import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
+import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
+import dht.message.MessageEndRange;
 import dht.message.MessageLeave;
 
 public class StateConnected extends ANodeState {
 
-	StateConnected(INetwork inetwork, BlockingQueue<AMessage> queue, Node node,
+	StateConnected(INetwork network, Queue<AMessage> queue, Node node,
 			Range range) {
-		super(inetwork, queue, node, range);
+		super(network, queue, node, range);
+	}
+
+	@Override
+	boolean isAcceptable(AMessage msg) {
+		return !(msg instanceof MessageConnect)
+				&& !(msg instanceof MessageDataRange)
+				&& !(msg instanceof MessageDisconnect)
+				&& !(msg instanceof MessageEndRange);
 	}
 
 	@Override
 	void process(MessageAskConnection msg) {
 		if (range.inRange(msg.getOriginalSource().getNumericID())) {
-			node.setState(new StateInsertingNext(inetwork, queue, node, range,
+			node.setState(new StateInsertingNext(network, queue, node, range,
 					msg));
 		} else {
-			inetwork.sendInChannel(node.getNext(), msg);
+			network.sendInChannel(node.getNext(), msg);
 		}
 	}
 
@@ -34,7 +44,7 @@ public class StateConnected extends ANodeState {
 	 */
 	@Override
 	void process(MessageData msg) {
-		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
+		node.setState(new StatePreviousDisconnecting(network, queue, node,
 				range, msg));
 	}
 
@@ -44,7 +54,7 @@ public class StateConnected extends ANodeState {
 	 */
 	@Override
 	void process(MessageBeginRange msg) {
-		node.setState(new StatePreviousDisconnecting(inetwork, queue, node,
+		node.setState(new StatePreviousDisconnecting(network, queue, node,
 				range, msg));
 	}
 
@@ -65,17 +75,16 @@ public class StateConnected extends ANodeState {
 
 		// TODO : Créer un état DiconnectingNext ???
 
-		inetwork.sendInChannel(node.getNext(),
+		network.sendInChannel(node.getNext(),
 				new MessageDisconnect(node.getId()));
-		inetwork.closeChannel(node.getNext());
+		network.closeChannel(node.getNext());
 		node.setNext(msg.getConnectNodeId());
-		inetwork.openChannel(node.getNext());
-		inetwork.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
+		network.openChannel(node.getNext());
+		network.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
 	}
-	
-	
+
 	@Override
 	public void process(MessageLeave msg) {
-		node.setState(new StateDisconnecting(inetwork, queue, node, range));
+		node.setState(new StateDisconnecting(network, queue, node, range));
 	}
 }

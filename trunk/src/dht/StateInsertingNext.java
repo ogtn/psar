@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 
 import dht.Range.Data;
 import dht.message.AMessage;
@@ -18,25 +18,32 @@ public class StateInsertingNext extends ANodeState {
 	private final MessageAskConnection msg;
 	private UInt oldEndRange;
 
-	StateInsertingNext(INetwork inetwork, BlockingQueue<AMessage> queue,
-			Node node, Range range, MessageAskConnection msg) {
-		super(inetwork, queue, node, range);
+	StateInsertingNext(INetwork network, Queue<AMessage> queue, Node node,
+			Range range, MessageAskConnection msg) {
+		super(network, queue, node, range);
 		this.msg = msg;
+	}
+
+	@Override
+	boolean isAcceptable(AMessage msg) {
+		// TODO Other msg tel que AskConnection si ne ns concerne pas
+		return (msg instanceof MessageGet || msg instanceof MessagePut
+				|| msg instanceof MessagePing || msg instanceof MessageDisconnect);
 	}
 
 	@Override
 	void init() {
 
 		// Déconnexion du suivant
-		inetwork.sendInChannel(node.getNext(), new MessageDisconnect(node
-				.getId()));
-		inetwork.closeChannel(node.getNext());
+		network.sendInChannel(node.getNext(),
+				new MessageDisconnect(node.getId()));
+		network.closeChannel(node.getNext());
 
 		// Etablissement de la connection vers le nouveau suivant
-		inetwork.openChannel(msg.getOriginalSource());
+		network.openChannel(msg.getOriginalSource());
 
 		// Envoi de l'ancien suivant à mon nouveau suivant pour reconnexion
-		inetwork.sendInChannel(msg.getOriginalSource(), new MessageConnectTo(
+		network.sendInChannel(msg.getOriginalSource(), new MessageConnectTo(
 				node.getId(), node.getNext()));
 
 		node.setNext(msg.getOriginalSource());
@@ -57,23 +64,14 @@ public class StateInsertingNext extends ANodeState {
 		Data data = range.shrinkToLast(node.getNext().getNumericID());
 
 		while (data != null) {
-			inetwork.sendInChannel(node.getNext(), new MessageDataRange(node
-					.getId(), data.getKey(), data.getData(), oldEndRange));
+			network.sendInChannel(
+					node.getNext(),
+					new MessageDataRange(node.getId(), data.getKey(), data
+							.getData(), oldEndRange));
 
 			// TODO filter is empty non bloquant
 			// Si j'ai reçu dans ma file un message que je peux traiter
-			if (queue.isEmpty() == false) {
-
-				System.out.println("Inserting next queue.isEmpty() "
-						+ queue.isEmpty());
-				System.out.println("Inserting next queue.size() "
-						+ queue.size());
-				System.out.println("Msg : ");
-				for (AMessage msg : queue) {
-					System.out.print(msg + " ");
-				}
-				System.out.println("");
-
+			if (pendingMessages()) {
 				// Je vais le traiter via un process
 				return;
 			}
@@ -84,12 +82,10 @@ public class StateInsertingNext extends ANodeState {
 		range.shrinkEnd(node.getNext().getNumericID());
 
 		// Envoi du reste de la plage au suivant
-		inetwork.sendInChannel(node.getNext(), new MessageEndRange(
-				node.getId(), oldEndRange));
+		network.sendInChannel(node.getNext(), new MessageEndRange(node.getId(),
+				oldEndRange));
 
-		System.out.println("Inserting next change d'état");
-
-		node.setState(new StateConnected(inetwork, queue, node, range));
+		node.setState(new StateConnected(network, queue, node, range));
 	}
 
 	@Override

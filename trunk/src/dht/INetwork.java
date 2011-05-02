@@ -88,8 +88,11 @@ public interface INetwork {
 		 */
 		@Override
 		public String toString() {
-			return super.toString() + "Le noeud " + sourceNode.getId()
-					+ " n'a pas de cannal ouvert vers l'id : " + unknowNodeId;
+			return "--------\n" + sourceNode;
+			/*
+			 * return super.toString() + "Le noeud " + sourceNode.getId() +
+			 * " n'a pas de cannal ouvert vers l'id : " + unknowNodeId;
+			 */
 		}
 	}
 
@@ -168,10 +171,14 @@ public interface INetwork {
 	 * Méthode bloquante permettant la récupération d'un message depuis la
 	 * couche réseau.
 	 * 
+	 * @param isBlocking
+	 *            <code>true</code> si la réception est bloquante,
+	 *            <code>false</code> sinon.
+	 * 
 	 * @return Le message reçu.
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	AMessage receive() throws NetworkException;
+	AMessage receive(boolean isBlocking) throws NetworkException;
 }
