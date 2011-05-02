@@ -49,6 +49,9 @@ public class Server extends Thread {
 			System.out.println("Avant selc");
 
 			while (selector.select() > 0) {
+				
+				System.out.println("apres selc");
+				
 				Iterator<SelectionKey> keys = selector.selectedKeys()
 						.iterator();
 				

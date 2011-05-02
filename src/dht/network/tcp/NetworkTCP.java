@@ -64,6 +64,9 @@ class NetworkTCP implements INetwork {
 		try {
 			selector = Selector.open();
 
+			if (node == null)
+				throw new IllegalStateException("node is null");
+
 			if (this.node != null)
 				throw new IllegalStateException(
 						"init method was already called");
@@ -227,7 +230,7 @@ class NetworkTCP implements INetwork {
 		TCPId tcpId = narrowToNetworkId(id);
 
 		message.setSource(node.getId());
-		
+
 		try {
 			next = SocketChannel.open(tcpId.getAddress());
 			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
@@ -296,7 +299,7 @@ class NetworkTCP implements INetwork {
 			System.out.println("nextId. " + nextId
 					+ "Envoi de message in bande : " + message + " de "
 					+ node.getId() + " à " + id);
-
+		
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
@@ -314,7 +317,7 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AMessage receive() throws NetworkException {
+	public AMessage receive(boolean isBlocking) throws NetworkException {
 
 		AMessage msg = null;
 		NetworkMessage netMsg = null;
@@ -328,9 +331,12 @@ class NetworkTCP implements INetwork {
 			// On ne sort pas la boucle tant que l'on a pas reçu un message
 			while (msg == null) {
 
-				// Attente d'un évènement sur nos sockets
-				selector.select();
-
+				if(isBlocking)
+					// Attente d'un évènement sur nos sockets
+					selector.select();
+				else if(selector.selectNow() == 0)
+					return null;
+				
 				// Clés des sockets ayant reçu un évènement
 				keys = selector.selectedKeys().iterator();
 

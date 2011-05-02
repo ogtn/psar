@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 
 import dht.Range.Data;
 import dht.message.AMessage;
@@ -20,9 +20,17 @@ public class StateDisconnecting extends ANodeState {
 	// et que l'on vide les messages pendants dans la file, false sinon.
 	private boolean dataTransfered;
 
-	StateDisconnecting(INetwork inetwork, BlockingQueue<AMessage> queue,
-			Node node, Range range) {
-		super(inetwork, queue, node, range);
+	StateDisconnecting(INetwork network, Queue<AMessage> queue, Node node,
+			Range range) {
+		super(network, queue, node, range);
+	}
+
+	@Override
+	boolean isAcceptable(AMessage msg) {
+		return msg instanceof MessageDisconnect
+				|| msg instanceof MessagePut
+				|| msg instanceof MessageGet
+				|| msg instanceof MessagePing;
 	}
 
 	@Override
@@ -44,39 +52,33 @@ public class StateDisconnecting extends ANodeState {
 		Data data = range.shrinkToLast(node.getId().getNumericID());
 
 		while (data != null) {
-			inetwork.sendInChannel(node.getNext(), new MessageData(
-					node.getId(), data.getKey(), data.getData()));
+			network.sendInChannel(node.getNext(), new MessageData(node.getId(),
+					data.getKey(), data.getData()));
 
 			// TODO filter is empty non bloquant
 			// Si j'ai reçu dans ma file un message que je peux traiter
-			if (queue.isEmpty() == false) {
+			if (pendingMessages()) {
 				// Je vais le traiter via un process
 				return;
 			}
 		}
 
 		// Envoi du reste de la plage
-		inetwork.sendInChannel(node.getNext(),
+		network.sendInChannel(node.getNext(),
 				new MessageBeginRange(node.getId(), oldBeginRange));
 
 		// Demande à notre précédent de se connecter à notre suivant
-		inetwork.sendTo(node.getPrevious(), new MessageConnectTo(node.getId(),
+		network.sendTo(node.getPrevious(), new MessageConnectTo(node.getId(),
 				node.getNext()));
 
 		// Fermeture vers le suivant
-		inetwork.sendInChannel(node.getNext(),
+		network.sendInChannel(node.getNext(),
 				new MessageDisconnect(node.getId()));
-		inetwork.closeChannel(node.getNext());
+		network.closeChannel(node.getNext());
 
 		dataTransfered = true;
 	}
 
-	@Override
-	void process(MessageAskConnection msg) {
-		super.process(msg);
-		dataTransfer();
-	}
-	
 	@Override
 	void process(MessageGet msg) {
 		super.process(msg);
@@ -97,10 +99,10 @@ public class StateDisconnecting extends ANodeState {
 
 	// TODO vérifier que l'on appelle dataTransfer(); sur toutes les methodes
 	// non filtrées
-	
+
 	@Override
 	void process(MessageDisconnect msg) {
 		// TODO vider la file des messages que l'on ne peut traiter
-		node.setState(new StateDisconnected(inetwork, queue, node, range));
+		node.setState(new StateDisconnected(network, queue, node, range));
 	}
 }

@@ -1,10 +1,11 @@
 package dht;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -31,7 +32,7 @@ public class Node implements INode, Runnable {
 	private ANodeId previous;
 	private final Range range;
 	private ANodeState state;
-	private final BlockingQueue<AMessage> queue;
+	private final Queue<AMessage> queue;
 
 	/**
 	 * Crée et intialise un noeud déconnecté de tout voisin.
@@ -45,7 +46,7 @@ public class Node implements INode, Runnable {
 	public Node(INetwork inetwork, ANodeId id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
 
-		queue = new ArrayBlockingQueue<AMessage>(42);
+		queue = new LinkedList<AMessage>();
 		this.inetwork = inetwork;
 		this.id = id;
 		next = id;
@@ -91,18 +92,6 @@ public class Node implements INode, Runnable {
 	public void run() {
 		// Initialisation de la couche réseau
 		inetwork.init(this);
-		new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						queue.put(inetwork.receive());
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}.start();
 
 		// Je me connecte
 		setState(new StateConnecting(inetwork, queue, this, range));
@@ -176,20 +165,15 @@ public class Node implements INode, Runnable {
 	// TODO synchronized
 	@Override
 	public void leave() {
-		try {
-			queue.put(new MessageLeave(id));
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		inetwork.sendTo(id, new MessageLeave(id));
 	}
 
 	// TODO synchronized
 	@Override
 	public void get(UInt key) {
-		
+
 		// TODO dans a fr ds state
-		
+
 		if (range.inRange(key)) {
 			Object tmpData = range.get(key);
 
@@ -240,7 +224,7 @@ public class Node implements INode, Runnable {
 		this.state = state;
 		this.state.init();
 	}
-	
+
 	// TODO delete
 	public String getState() {
 		return state.getClass().getName();

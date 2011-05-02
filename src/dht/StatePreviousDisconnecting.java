@@ -1,29 +1,41 @@
 package dht;
 
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageBeginRange;
+import dht.message.MessageConnect;
 import dht.message.MessageData;
+import dht.message.MessageGet;
+import dht.message.MessagePing;
+import dht.message.MessagePut;
 
 public class StatePreviousDisconnecting extends ANodeState {
 
 	// Constructeur appellé qd le prévious doit de nous tranferer les datas
-	StatePreviousDisconnecting(INetwork inetwork,
-			BlockingQueue<AMessage> queue, Node node, Range range,
-			final MessageData msg) {
-		super(inetwork, queue, node, range);
+	StatePreviousDisconnecting(INetwork network, Queue<AMessage> queue,
+			Node node, Range range, final MessageData msg) {
+		super(network, queue, node, range);
 		process(msg);
 	}
 
 	// Constructeur appellé qd le prévious doit nous tranferer sa plage mais n'a
 	// pas de datas
-	StatePreviousDisconnecting(INetwork inetwork,
-			BlockingQueue<AMessage> queue, Node node, Range range,
-			final MessageBeginRange msg) {
-		super(inetwork, queue, node, range);
+	StatePreviousDisconnecting(INetwork network, Queue<AMessage> queue,
+			Node node, Range range, final MessageBeginRange msg) {
+		super(network, queue, node, range);
 		process(msg);
 	}
+
+	
+	@Override
+	boolean isAcceptable(AMessage msg) {
+		return msg instanceof MessageGet || msg instanceof MessagePut
+				|| msg instanceof MessagePing || msg instanceof MessageData
+				|| msg instanceof MessageBeginRange
+				|| msg instanceof MessageConnect;
+	};
 
 	@Override
 	void process(MessageData msg) {
@@ -36,6 +48,10 @@ public class StatePreviousDisconnecting extends ANodeState {
 		// Dernier message reçu Reception d'une nouvelle donnée : on agrandit la
 		// plage
 		range.setBegin(msg.getBegin());
-		node.setState(new StateConnected(inetwork, queue, node, range));
+	}
+
+	@Override
+	void process(MessageConnect msg) {
+		node.setState(new StateConnected(network, queue, node, range));
 	}
 }

@@ -1,7 +1,8 @@
 package dht;
 
+import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -20,18 +21,66 @@ import dht.message.MessagePut;
 
 abstract class ANodeState {
 
-	protected INetwork inetwork;
-	protected BlockingQueue<AMessage> queue;
+	protected INetwork network;
+	protected Queue<AMessage> queue;
 	protected Node node;
 	protected Range range;
 
-	ANodeState(INetwork inetwork, BlockingQueue<AMessage> queue, Node node,
-			Range range) {
-		this.node = node;
+	ANodeState(INetwork network, Queue<AMessage> queue, Node node, Range range) {
+		this.network = network;
 		this.queue = queue;
-		this.inetwork = inetwork;
+		this.node = node;
 		this.range = range;
 	}
+
+	final AMessage filter() {
+
+		Iterator<AMessage> iter = queue.iterator();
+
+		while (iter.hasNext()) {
+			AMessage msg = iter.next();
+
+			if (isAcceptable(msg)) {
+				iter.remove();
+				return msg;
+			}
+		}
+
+		while (true) {
+			AMessage msg = network.receive(true);
+
+			if (isAcceptable(msg))
+				return msg;
+			else
+				queue.add(msg);
+		}
+	}
+
+	/**
+	 * ret true si on a un lmsg que l'on peut traietr, false sinon
+	 * 
+	 * @return
+	 */
+	boolean pendingMessages() {
+
+		Iterator<AMessage> iter = queue.iterator();
+
+		while (iter.hasNext()) {
+			AMessage msg = iter.next();
+
+			if (isAcceptable(msg))
+				return true;
+		}
+
+		AMessage msg = network.receive(false);
+		if (msg != null) {
+			queue.add(msg);
+			return true;
+		} else
+			return false;
+	}
+
+	abstract boolean isAcceptable(AMessage msg);
 
 	void init() {
 	}
@@ -77,7 +126,7 @@ abstract class ANodeState {
 		} else {
 			System.out.println(node.getId() + "route get vers "
 					+ node.getNext());
-			inetwork.sendInChannel(node.getNext(), msg);
+			network.sendInChannel(node.getNext(), msg);
 		}
 	}
 
@@ -93,13 +142,13 @@ abstract class ANodeState {
 			 */
 
 			System.out.println("PING : " + node);
-			inetwork.sendInChannel(node.getNext(), msg);
+			network.sendInChannel(node.getNext(), msg);
 		}
 	}
 
 	void process(MessagePut msg) {
 		if (range.inRange(msg.getKey()) == false) {
-			inetwork.sendInChannel(node.getNext(), msg);
+			network.sendInChannel(node.getNext(), msg);
 		} else {
 			System.out.println(node.getId() + "route put vers "
 					+ node.getNext());
@@ -107,17 +156,7 @@ abstract class ANodeState {
 		}
 	}
 
-	public AMessage filter() {
-		try {
-			return queue.take();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new IllegalStateException(e);
-		}
-	}
-
-	public void process(MessageLeave msg) {
+	void process(MessageLeave msg) {
 		// TODO illegal state exception
 	}
 }
