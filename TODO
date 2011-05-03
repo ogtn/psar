@@ -1,10 +1,11 @@
 Message d'erreur si identifiant identique : que se passe t-il en cas de messages identiques.
 
 Leave
- ﻿  -Si un seul noeud
- ﻿  -Si deux noeuds
+ 	-Si un seul noeud
+ 	-Si deux noeuds
  
 Détection de code mort 
 	-graphviz
  	-Quand déconnexion, on doit vider notre file de requêtes.
  
+ Envoyer un seriliazble au lieu d'un object
