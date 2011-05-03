@@ -1,22 +1,10 @@
 Message d'erreur si identifiant identique : que se passe t-il en cas de messages identiques.
-  
- Leave
- ﻿  -Si un seul noeud
- ﻿  -Même msg? Prise en compte de la deco des deux canaux
- ﻿  -Transfert data
- ﻿  
- Objet DATA regroupant key + object???
- 
- Détection de code mort
 
- Pour après : timeout sur file lors du "défilement", pour ne pas bloquer en l'attente d'un message jamais reçu.
+Leave
+ ﻿  -Si un seul noeud
+ ﻿  -Si deux noeuds
  
- -grapiz
- -Transfert des datas alternativement
- -Run + filtre
- -Fn leave get put remplace par msg
- -Méthode doit remonter a son propriétaire.
- -problème de l'etat disconnecting inexistant (cf méthode leave()...) + quand déconnexion, on doit vider notre file de requêtes
- ﻿  
- ﻿  
- ﻿   
+Détection de code mort 
+	-graphviz
+ 	-Quand déconnexion, on doit vider notre file de requêtes.
+ 
