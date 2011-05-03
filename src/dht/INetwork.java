@@ -88,11 +88,8 @@ public interface INetwork {
 		 */
 		@Override
 		public String toString() {
-			return "--------\n" + sourceNode;
-			/*
-			 * return super.toString() + "Le noeud " + sourceNode.getId() +
-			 * " n'a pas de cannal ouvert vers l'id : " + unknowNodeId;
-			 */
+			return super.toString() + "Le noeud " + sourceNode.getId()
+					+ " n'a pas de cannal ouvert vers l'id : " + unknowNodeId;
 		}
 	}
 
@@ -181,4 +178,16 @@ public interface INetwork {
 	 *             réseau se produit.
 	 */
 	AMessage receive(boolean isBlocking) throws NetworkException;
+	
+	/**
+	 * 
+	 * @param listener
+	 */
+	void addNetworkListener(INetworkListener listener);
+	
+	/**
+	 * 
+	 * @param listener
+	 */
+	void removeNetworkListener(INetworkListener listener);
 }

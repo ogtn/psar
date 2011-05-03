@@ -1,7 +1,6 @@
 package dht;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Queue;
 
 import dht.message.AMessage;
@@ -13,13 +12,13 @@ import dht.message.MessageData;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
-import dht.message.MessageError;
 import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
+import dht.message.MessageReturnGet;
 
-abstract class ANodeState {
+public abstract class ANodeState {
 
 	protected INetwork network;
 	protected Queue<AMessage> queue;
@@ -111,37 +110,24 @@ abstract class ANodeState {
 	void process(MessageEndRange msg) {
 	}
 
-	void process(MessageError msg) {
-	}
-
 	void process(MessageGet msg) {
 		if (range.inRange(msg.getKey())) {
-
-			Object tmpData = range.get(msg.getKey());
-
-			if (tmpData == null)
-				System.out.println("Fail : " + msg.getKey());
-			else
-				System.out.println("Ok : " + tmpData + " id: " + node.getId());
-		} else {
-			System.out.println(node.getId() + "route get vers "
-					+ node.getNext());
+			network.sendTo(msg.getOriginalSource(),
+					new MessageReturnGet(node.getId(), range.get(msg.getKey())));
+		} else
 			network.sendInChannel(node.getNext(), msg);
-		}
+	}
+
+	void process(MessageReturnGet msg) {
+		node.setReturnGet(msg.getData());
 	}
 
 	void process(MessagePing msg) {
-		if (msg.getOriginalSource().equals(node.getId()) == false) {
-			Map<UInt, Object> data = range.getData();
-			/*
-			 * Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
-			 * String out = "";
-			 * 
-			 * while (iter.hasNext()) { Entry<UInt, Object> entry = iter.next();
-			 * out += "{" + entry.getKey() + " : " + entry.getValue() + "}"; }
-			 */
-
-			System.out.println("PING : " + node);
+		
+		if (msg.getOriginalSource().equals(node.getId())
+				&& msg.getSource().equals(node.getId()) == false) {
+			
+		} else {
 			network.sendInChannel(node.getNext(), msg);
 		}
 	}
@@ -157,6 +143,5 @@ abstract class ANodeState {
 	}
 
 	void process(MessageLeave msg) {
-		// TODO illegal state exception
 	}
 }

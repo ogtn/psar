@@ -4,7 +4,6 @@ import java.util.Queue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
-import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 
 /**
@@ -45,20 +44,11 @@ public class StateConnecting extends ANodeState {
 	 */
 	@Override
 	void process(MessageConnectTo msg) {
-
 		/*
-		 * Je suis en attente de connexion à l'anneau et viens de recvoir un
-		 * message me disant a qui connecter
+		 * Je suis en attente de connexion à l'anneau et viens de recevoir un
+		 * message me disant à qui me connecter
 		 */
 
-		// TODO reflechir pourquoi on traite le message ici que ds l etat
-		// suivant choisir entre les deux cas
-
-		node.setNext(msg.getConnectNodeId());
-		network.openChannel(node.getNext());
-		network.sendInChannel(node.getNext(), new MessageConnect(node.getId()));
-		node.setPrevious(msg.getSource());
-
-		node.setState(new StateConnectedWaitRange(network, queue, node, range));
+		node.setState(new StateConnectedWaitRange(network, queue, node, range, msg));
 	}
 }

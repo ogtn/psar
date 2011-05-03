@@ -6,7 +6,7 @@ package dht;
  */
 public interface INode {
 	/**
-	 * Retorune l'identifiant du noeud.
+	 * Retourne l'identifiant du noeud.
 	 */
 	ANodeId getId();
 
@@ -16,7 +16,9 @@ public interface INode {
 	
 	void leave();
 	
-	void get(UInt key);
+	Object get(UInt key);
 
-	String getState();
+	void addINodeListener(INodeListener listener);
+	
+	void removeINodeListener(INodeListener listener);
 }

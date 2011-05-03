@@ -72,9 +72,6 @@ public class StateConnected extends ANodeState {
 	 */
 	@Override
 	void process(MessageConnectTo msg) {
-
-		// TODO : Créer un état DiconnectingNext ???
-
 		network.sendInChannel(node.getNext(),
 				new MessageDisconnect(node.getId()));
 		network.closeChannel(node.getNext());

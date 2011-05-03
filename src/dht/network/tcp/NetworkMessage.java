@@ -12,7 +12,7 @@ class NetworkMessage implements Serializable {
 
 	/**
 	 * Type de message
-	 * */
+	 */
 	enum Type {
 		/* Lorsque l'on ouvre un canal */
 		OPEN_CHANNEL,
@@ -56,21 +56,5 @@ class NetworkMessage implements Serializable {
 	 */
 	public Type getType() {
 		return type;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-
-		StringBuilder strBuild = new StringBuilder();
-
-		strBuild.append("\n==== NetworkMessage ===\n");
-		strBuild.append("Content: ");
-		strBuild.append(content.toString());
-		strBuild.append("======================\n");
-
-		return strBuild.toString();
 	}
 }

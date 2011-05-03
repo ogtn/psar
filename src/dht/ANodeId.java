@@ -49,6 +49,5 @@ public abstract class ANodeId implements Serializable {
 	@Override
 	public int hashCode() {
 		return id.hashCode();
-	}
-	
+	}	
 }

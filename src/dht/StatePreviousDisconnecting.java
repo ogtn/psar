@@ -1,7 +1,6 @@
 package dht;
 
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageBeginRange;
@@ -10,6 +9,7 @@ import dht.message.MessageData;
 import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
+import dht.message.MessageReturnGet;
 
 public class StatePreviousDisconnecting extends ANodeState {
 
@@ -28,14 +28,14 @@ public class StatePreviousDisconnecting extends ANodeState {
 		process(msg);
 	}
 
-	
 	@Override
 	boolean isAcceptable(AMessage msg) {
 		return msg instanceof MessageGet || msg instanceof MessagePut
 				|| msg instanceof MessagePing || msg instanceof MessageData
 				|| msg instanceof MessageBeginRange
-				|| msg instanceof MessageConnect;
-	};
+				|| msg instanceof MessageConnect
+				|| msg instanceof MessageReturnGet;
+	}
 
 	@Override
 	void process(MessageData msg) {

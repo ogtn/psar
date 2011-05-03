@@ -4,7 +4,6 @@ import java.util.Queue;
 
 import dht.Range.Data;
 import dht.message.AMessage;
-import dht.message.MessageAskConnection;
 import dht.message.MessageBeginRange;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
@@ -54,8 +53,7 @@ public class StateDisconnecting extends ANodeState {
 		while (data != null) {
 			network.sendInChannel(node.getNext(), new MessageData(node.getId(),
 					data.getKey(), data.getData()));
-
-			// TODO filter is empty non bloquant
+			
 			// Si j'ai reçu dans ma file un message que je peux traiter
 			if (pendingMessages()) {
 				// Je vais le traiter via un process
@@ -96,9 +94,6 @@ public class StateDisconnecting extends ANodeState {
 		super.process(msg);
 		dataTransfer();
 	}
-
-	// TODO vérifier que l'on appelle dataTransfer(); sur toutes les methodes
-	// non filtrées
 
 	@Override
 	void process(MessageDisconnect msg) {
