@@ -9,16 +9,29 @@ digraph fsm
     CONNECTED_WAIT_RANGE;
     CONNECTED;
     INSERTING_NEXT;
-    PREVIOUS_LEAVING;
-
+    PREVIOUS_DISCONNECTING;
+    
+    /* etats fantomes */
+    INSERTING_PREVIOUS [style = "dotted"];
+	DISCONNECTING_NEXT [style = "dotted"];
+	
     DISCONNECTED -> CONNECTING [label = "run()"];
-    DISCONNECTED -> CONNECTED [label = "recv(MsgConnect) && id == next"];
-    CONNECTING -> CONNECTED_WAIT_RANGE [label = "send(MsgConnect(next))"];
+    
+    CONNECTING -> CONNECTED_WAIT_RANGE [label = "MsgConnectTo"];
+    CONNECTING -> CONNECTED [label = "premier nœud"];
+    
+    CONNECTED -> INSERTING_NEXT [label = "MsgAskConnection"];
+    CONNECTED -> DISCONNECTING [label = "MsgLeave"];
+    CONNECTED -> PREVIOUS_DISCONNECTING [label = "MsgData || MsgBeginRange"];
+    CONNECTED -> DISCONNECTING_NEXT [label = "MsgConnectTo"];
+    
+    DISCONNECTING_NEXT -> CONNECTED [label = "connexion rétablie"];
+    
     CONNECTED_WAIT_RANGE -> CONNECTED [label = "recv(MsgEndRange"];
-    CONNECTED -> DISCONNECTING [label = "leave()"];
-    DISCONNECTING -> DISCONNECTED [label = "send(MsgDisconnect(next))"];
-    CONNECTED -> PREVIOUS_LEAVING [label = "recv(MsgData)"];
-    PREVIOUS_LEAVING -> CONNECTED [label = "recv(MsgDisconnect)"];
-    CONNECTED -> INSERTING_NEXT [label = "recv(MsgAsk())"];
-    INSERTING_NEXT -> CONNECTED [label = "send(MsgEndOfRange)"];
+    
+    DISCONNECTING -> DISCONNECTED [label = "MsgDisconnect"];
+    
+    PREVIOUS_DISCONNECTING -> CONNECTED [label = "MsgConnect"];
+    
+    INSERTING_NEXT -> CONNECTED [label = "données envoyées"];
 };
