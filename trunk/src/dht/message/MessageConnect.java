@@ -8,7 +8,7 @@ import dht.ANodeId;
  * Lors de la réception d'un message {@link MessageConnectTo} indiquant le
  * successeur de l'<code>INode</code> récepteur, le récepteur envoie un
  * <code>MessageConnect</code> au successeur lors de l'ouverture de la
- * connection.
+ * connexion.
  */
 public class MessageConnect extends AMessage {
 

@@ -12,12 +12,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import dht.ANodeId;
 import dht.INetwork;
+import dht.INetworkListener;
 import dht.INode;
 import dht.message.AMessage;
 import dht.network.tcp.NetworkMessage.Type;
@@ -29,18 +32,17 @@ import dht.tools.Tools;
  */
 class NetworkTCP implements INetwork {
 
-	// TODO
-	private static boolean gruickPrint = false;
-
 	private INode node;
 	private Selector selector;
 	private TCPId nextId;
 	private SocketChannel nextChannel;
 
 	/**
-	 * Connections en attente
+	 * Connexions en attente
 	 */
 	private final Queue<SocketChannel> pendingConnections;
+
+	private final List<INetworkListener> listeners;
 
 	/**
 	 * Crée et initialise un objet de gestion du réseau pour un noeud donné.
@@ -51,6 +53,7 @@ class NetworkTCP implements INetwork {
 		nextId = null;
 		nextChannel = null;
 		pendingConnections = new LinkedList<SocketChannel>();
+		listeners = new ArrayList<INetworkListener>();
 	}
 
 	/**
@@ -218,13 +221,11 @@ class NetworkTCP implements INetwork {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * thread safe.
 	 */
 	@Override
 	public void sendTo(ANodeId id, AMessage message) throws NetworkException {
-
-		if (gruickPrint)
-			System.out.println("Envoi de message hors bande : " + message
-					+ " de " + node.getId() + " à " + id);
 
 		SocketChannel next = null;
 		TCPId tcpId = narrowToNetworkId(id);
@@ -235,6 +236,7 @@ class NetworkTCP implements INetwork {
 			next = SocketChannel.open(tcpId.getAddress());
 			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
 					message));
+			fireSendMessage(message);
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		} finally {
@@ -295,11 +297,6 @@ class NetworkTCP implements INetwork {
 	public void sendInChannel(ANodeId id, AMessage message)
 			throws ChannelNotFoundException, NetworkException {
 
-		if (gruickPrint)
-			System.out.println("nextId. " + nextId
-					+ "Envoi de message in bande : " + message + " de "
-					+ node.getId() + " à " + id);
-		
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
@@ -308,6 +305,7 @@ class NetworkTCP implements INetwork {
 		try {
 			writeObject(nextChannel, new NetworkMessage(
 					Type.MESSAGE_IN_CHANNEL, message));
+			fireSendMessage(message);
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		}
@@ -331,12 +329,12 @@ class NetworkTCP implements INetwork {
 			// On ne sort pas la boucle tant que l'on a pas reçu un message
 			while (msg == null) {
 
-				if(isBlocking)
+				if (isBlocking)
 					// Attente d'un évènement sur nos sockets
 					selector.select();
-				else if(selector.selectNow() == 0)
+				else if (selector.selectNow() == 0)
 					return null;
-				
+
 				// Clés des sockets ayant reçu un évènement
 				keys = selector.selectedKeys().iterator();
 
@@ -356,7 +354,7 @@ class NetworkTCP implements INetwork {
 
 						/*
 						 * On ne peut avoir dans notre sélecteur que la socket
-						 * serveur courante et une seule connection entrante.
+						 * serveur courante et une seule connecxion entrante.
 						 */
 						if (selector.keys().size() == 2) {
 							// Quand une connexion arrive, avant d'avoir recu le
@@ -406,6 +404,62 @@ class NetworkTCP implements INetwork {
 			throw new NetworkException(e);
 		}
 
+		fireRecvMessage(msg);
+
 		return msg;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addNetworkListener(INetworkListener listener) {
+		if (listener == null)
+			throw new NullPointerException();
+
+		listeners.add(listener);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeNetworkListener(INetworkListener listener) {
+		if (listener == null)
+			throw new NullPointerException();
+
+		listeners.remove(listener);
+	}
+
+	/**
+	 * Notifie aux listners un évènement envoi de messages.
+	 * 
+	 * @param message
+	 *            Les messages envoyés.
+	 */
+	private void fireSendMessage(AMessage message) {
+		for (INetworkListener listener : listeners) {
+			try {
+				listener.sendMessage(message, node);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Notifie aux listners un évènement réception de messages.
+	 * 
+	 * @param message
+	 *            Les messages envoyés.
+	 */
+	private void fireRecvMessage(AMessage message) {
+		for (INetworkListener listener : listeners) {
+			try {
+				listener.recvMessage(message, node);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

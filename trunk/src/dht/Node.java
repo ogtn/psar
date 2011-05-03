@@ -1,11 +1,9 @@
 package dht;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -20,6 +18,7 @@ import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
+import dht.message.MessageReturnGet;
 
 /**
  * Implémentation concrète d'un noeud de l'application.
@@ -33,6 +32,9 @@ public class Node implements INode, Runnable {
 	private final Range range;
 	private ANodeState state;
 	private final Queue<AMessage> queue;
+	// Valeur de retour du get
+	private Object returnGet;
+	private List<INodeListener> listeners;
 
 	/**
 	 * Crée et intialise un noeud déconnecté de tout voisin.
@@ -53,6 +55,7 @@ public class Node implements INode, Runnable {
 		previous = null;
 		range = new Range(id.getNumericID());
 		state = new StateDisconnected(inetwork, queue, this, range);
+		listeners = new ArrayList<INodeListener>();
 	}
 
 	/**
@@ -68,13 +71,14 @@ public class Node implements INode, Runnable {
 	 *            connecter.
 	 */
 	public Node(INetwork inetwork, ANodeId id, ANodeId firstNode) {
-		queue = new ArrayBlockingQueue<AMessage>(42);
+		queue = new LinkedList<AMessage>();
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
 		previous = null;
 		range = new Range();
 		state = new StateDisconnected(inetwork, queue, this, range);
+		listeners = new ArrayList<INodeListener>();
 	}
 
 	/**
@@ -128,6 +132,8 @@ public class Node implements INode, Runnable {
 				state.process((MessageEndRange) msg);
 			} else if (msg instanceof MessageLeave) {
 				state.process((MessageLeave) msg);
+			} else if (msg instanceof MessageReturnGet) {
+				state.process((MessageReturnGet) msg);
 			} else
 				System.err.println("Kernel panic dans "
 						+ this.getClass().getName() + " pr msg : '" + msg
@@ -135,66 +141,44 @@ public class Node implements INode, Runnable {
 		}
 	}
 
-	// TODO synchronized
 	@Override
 	public void ping() {
-
-		Map<UInt, Object> data = range.getData();
-		Iterator<Entry<UInt, Object>> iter = data.entrySet().iterator();
-		String out = "";
-
-		while (iter.hasNext()) {
-			Entry<UInt, Object> entry = iter.next();
-			out += "{" + entry.getKey() + " : " + entry.getValue() + "}";
-		}
-
-		System.out.println("PING : " + this);
-
-		inetwork.sendInChannel(next, new MessagePing(id));
+		inetwork.sendTo(id, new MessagePing(id));
 	}
 
-	// TODO synchronized
 	@Override
 	public void put(UInt key, Object data) {
-		if (range.inRange(key))
-			range.add(key, data);
-		else
-			inetwork.sendInChannel(next, new MessagePut(id, data, key));
+		inetwork.sendTo(id, new MessagePut(id, data, key));
 	}
 
-	// TODO synchronized
 	@Override
 	public void leave() {
 		inetwork.sendTo(id, new MessageLeave(id));
 	}
 
-	// TODO synchronized
 	@Override
-	public void get(UInt key) {
+	public Object get(UInt key) {
+		synchronized (this) {
+			inetwork.sendTo(id, new MessageGet(id, key));
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
-		// TODO dans a fr ds state
+		return returnGet;
+	}
 
-		if (range.inRange(key)) {
-			Object tmpData = range.get(key);
-
-			if (tmpData == null)
-				System.out.println("Fail : " + key);
-			else
-				System.out.println("Ok : " + tmpData + " id: " + id);
-		} else {
-			// System.out.println("Envoie de " + id + " GET a " + next);
-			inetwork.sendInChannel(next, new MessageGet(id, key));
+	void setReturnGet(Object data) {
+		synchronized (this) {
+			returnGet = data;
+			notifyAll();
 		}
 	}
 
-	public Range getRange() {
+	Range getRange() {
 		return range;
-	}
-
-	@Override
-	public String toString() {
-		return "id : '" + id + "' next '" + next + "' previous '" + previous
-				+ "' status: '" + state.getClass().getName() + "' " + range;
 	}
 
 	ANodeId getNext() {
@@ -214,19 +198,44 @@ public class Node implements INode, Runnable {
 	}
 
 	void setState(ANodeState state) {
-
-		/*
-		 * System.out.println("	Le noeud " + id + " passe de l'etat '" +
-		 * this.state.getClass().getName() + "' à '" +
-		 * state.getClass().getName() + "'");
-		 */
-
+		fireChangeSate(this.state, state);
 		this.state = state;
 		this.state.init();
 	}
 
-	// TODO delete
-	public String getState() {
-		return state.getClass().getName();
+	@Override
+	public void addINodeListener(INodeListener listener) {
+		if (listener == null)
+			throw new NullPointerException();
+
+		listeners.add(listener);
+	}
+
+	@Override
+	public void removeINodeListener(INodeListener listener) {
+		if (listener == null)
+			throw new NullPointerException();
+
+		listeners.remove(listener);
+	}
+
+	/**
+	 * 
+	 * @param message
+	 */
+	private void fireChangeSate(ANodeState oldState, ANodeState newState) {
+		for (INodeListener listener : listeners) {
+			try {
+				listener.changeState(this, oldState, newState);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "id : '" + id + "' next '" + next + "' previous '" + previous
+				+ "' status: '" + state.getClass().getName() + "' " + range;
 	}
 }

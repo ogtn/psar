@@ -12,6 +12,7 @@ import dht.message.MessageEndRange;
 import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
+import dht.message.MessageReturnGet;
 
 public class StateInsertingNext extends ANodeState {
 
@@ -26,9 +27,15 @@ public class StateInsertingNext extends ANodeState {
 
 	@Override
 	boolean isAcceptable(AMessage msg) {
-		// TODO Other msg tel que AskConnection si ne ns concerne pas
-		return (msg instanceof MessageGet || msg instanceof MessagePut
-				|| msg instanceof MessagePing || msg instanceof MessageDisconnect);
+		/*
+		 * OPTIM On pourrait envisager de faire transiter les messages
+		 * AskConnection qui ne nous concernent pas. Cela posse le problème de
+		 * la duplication de code.
+		 */
+		return msg instanceof MessageGet || msg instanceof MessagePut
+				|| msg instanceof MessagePing
+				|| msg instanceof MessageDisconnect
+				|| msg instanceof MessageReturnGet;
 	}
 
 	@Override
@@ -39,7 +46,7 @@ public class StateInsertingNext extends ANodeState {
 				new MessageDisconnect(node.getId()));
 		network.closeChannel(node.getNext());
 
-		// Etablissement de la connection vers le nouveau suivant
+		// Etablissement de la connexion vers le nouveau suivant
 		network.openChannel(msg.getOriginalSource());
 
 		// Envoi de l'ancien suivant à mon nouveau suivant pour reconnexion
@@ -69,7 +76,6 @@ public class StateInsertingNext extends ANodeState {
 					new MessageDataRange(node.getId(), data.getKey(), data
 							.getData(), oldEndRange));
 
-			// TODO filter is empty non bloquant
 			// Si j'ai reçu dans ma file un message que je peux traiter
 			if (pendingMessages()) {
 				// Je vais le traiter via un process
@@ -106,10 +112,14 @@ public class StateInsertingNext extends ANodeState {
 		dataTransfer();
 	}
 
-	// TODO vérifier que l'on appelle dataTransfer(); sur toutes les methodes
-	// non filtrées
 	@Override
 	void process(MessageDisconnect msg) {
+		super.process(msg);
+		dataTransfer();
+	}
+
+	@Override
+	void process(MessageReturnGet msg) {
 		super.process(msg);
 		dataTransfer();
 	}

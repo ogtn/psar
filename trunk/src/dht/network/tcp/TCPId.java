@@ -21,7 +21,7 @@ class TCPId extends ANodeId {
 	 * @param id
 	 *            Identifiant du noeud.
 	 * @param address
-	 *            Adresse et port vers lesquels on peut ouvrir une connection
+	 *            Adresse et port vers lesquels on peut ouvrir une connexion
 	 *            TCP.
 	 */
 	public TCPId(final UInt id, final InetSocketAddress address) {

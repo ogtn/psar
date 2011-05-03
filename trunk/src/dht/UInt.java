@@ -148,7 +148,7 @@ public final class UInt implements Serializable {
 			MutableUInt mUInt = (MutableUInt) obj;
 			return mUInt.toLong() == this.uInt;
 		}
-
+		
 		return false;
 	}
 

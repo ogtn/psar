@@ -2,43 +2,27 @@ package dht.tools;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
+/**
+ * Classe utilitaire.
+ */
 public class Tools {
 
+	/**
+	 * Ferme une ressource Closeable sans lancer d'exceptions.
+	 * 
+	 * @param c
+	 *            La ressource à fermer.
+	 */
 	public static void close(Closeable c) {
-		
-		if(c != null)
-		{
+
+		if (c != null) {
 			try {
 				c.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-	}
 
-	public static void close(Socket s) {
-		if(s != null)
-		{
-			try {
-				s.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public static void close(ServerSocket s) {
-		if(s != null)
-		{
-			try {
-				s.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }

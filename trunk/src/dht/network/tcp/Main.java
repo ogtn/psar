@@ -13,19 +13,26 @@ import dht.UInt;
 
 class Main {
 
+	static private final PrintNetworkListener netList = new PrintNetworkListener();
+	static private final PrintNodeListener nodeList = new PrintNodeListener();
+	
 	static void init(List<TCPId> ids, Map<UInt, TCPId> connectedNodes,
 			List<Thread> threads, List<Node> nodes) {
 
 		for (TCPId netId : ids) {
 			TCPId connectId = connectedNodes.get(netId.getNumericID());
 			Node node = null;
-
+			NetworkTCP netTcp = new NetworkTCP();
+			netTcp.addNetworkListener(netList);
 			if (connectId != null) {
-				node = new Node(new NetworkTCP(), netId, connectId);
+				node = new Node(netTcp, netId, connectId);
+				node.addINodeListener(nodeList);
 			} else {
-				node = new Node(new NetworkTCP(), netId);
+				node = new Node(netTcp, netId);
+				node.addINodeListener(nodeList);
 			}
 			nodes.add(node);
+			
 			threads.add(new Thread(node));
 		}
 	}
@@ -50,11 +57,10 @@ class Main {
 
 		for (Thread t : threads) {
 			t.start();
-			/*try {
-				t.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}*/
+			/*
+			 * try { t.sleep(1000); } catch (InterruptedException e) {
+			 * e.printStackTrace(); }
+			 */
 		}
 
 		try {
@@ -329,6 +335,13 @@ class Main {
 			t.start();
 
 			if (cpt == 0) {
+
+				try {
+					t.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
 				for (Entry<UInt, Object> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
@@ -358,13 +371,14 @@ class Main {
 		}
 		// /////////////////////////////////////////////////////////////////
 
-		nodes.get(1).get(new UInt(2000));
-		nodes.get(0).get(new UInt(5000));
-		nodes.get(0).get(new UInt(7000));
-		nodes.get(0).get(new UInt(9000));
-		nodes.get(0).get(new UInt(1000));
+		System.out.println(nodes.get(1).get(new UInt(2000)));
+		System.out.println(nodes.get(0).get(new UInt(5000)));
+		System.out.println(nodes.get(0).get(new UInt(7000)));
+		System.out.println(nodes.get(0).get(new UInt(9000)));
+		System.out.println(nodes.get(0).get(new UInt(1000)));
 
-		nodes.get(0).get(new UInt(42));
+		System.out.println(nodes.get(0).get(new UInt(42)));
+		;
 
 		try {
 			Thread.sleep(500);
@@ -381,6 +395,105 @@ class Main {
 		}
 	}
 
+	public static void leaveMyLittleAss() {
+		int n = 5;
+		Random generator = new Random();
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
+		List<Thread> threads = new LinkedList<Thread>();
+		List<Node> nodes = new LinkedList<Node>();
+		Map<UInt, Object> data = new HashMap<UInt, Object>();
+
+		data.put(new UInt(1000L), "1000");
+		data.put(new UInt(2763L), "2763");
+		data.put(new UInt(2000L), "2000");
+		data.put(new UInt(5000L), "5000");
+		data.put(new UInt(7000L), "7000");
+		data.put(new UInt(9000L), "9000");
+
+		generator.setSeed(42);
+
+		for (int cpt = 0; cpt < n; cpt++)
+			ids.add(new TCPId(new UInt((long) (generator.nextInt(10000))),
+					new InetSocketAddress(1515 + cpt)));
+
+		for (TCPId id : ids)
+			System.out.println(id.getNumericID());
+		System.out.println("");
+
+		for (int cpt = 0; cpt < n; cpt++)
+			if (cpt != 0)
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
+			else
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
+
+		init(ids, connectedNodes, threads, nodes);
+
+		int cpt = 0;
+
+		for (Thread t : threads) {
+			t.start();
+
+			if (cpt == 0) {
+				try {
+					t.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				for (Entry<UInt, Object> entry : data.entrySet()) {
+					nodes.get(0).put(entry.getKey(), entry.getValue());
+				}
+			}
+			cpt++;
+
+			try {
+				t.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		// TODO syncronizerdd
+		nodes.get(0).ping();
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// /////////////////////////////////////////////////////////////////
+
+		System.out.println("===== " + nodes.get(1).getId() + " se déco : ");
+
+		nodes.get(1).leave();
+		nodes.get(2).leave();
+		nodes.get(3).leave();
+		nodes.get(4).leave();
+
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		// TODO syncronizerdd
+		nodes.get(0).ping();
+
+		for (Thread t : threads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void leaveMyAss(int n) {
 
 		Random generator = new Random();
@@ -421,6 +534,11 @@ class Main {
 			t.start();
 
 			if (cpt == 0) {
+				try {
+					t.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				for (Entry<UInt, Object> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
@@ -474,12 +592,13 @@ class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			contigue(10);
+			//contigue(10);
 			// random(10);
-			//cokeAndPut(3);
-			//getMeIMFamous(10);
+			// cokeAndPut(3);
+			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?
-			//leaveMyAss(5);
+			// leaveMyAss(5);
+			leaveMyLittleAss();
 			// coranAlternatif();
 		} catch (Exception e) {
 			// TODO: handle exception
