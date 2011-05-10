@@ -592,13 +592,13 @@ class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			//contigue(10);
-			// random(10);
+			// contigue(10);
+			random(10);
 			// cokeAndPut(3);
 			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?
 			// leaveMyAss(5);
-			leaveMyLittleAss();
+			// leaveMyLittleAss();
 			// coranAlternatif();
 		} catch (Exception e) {
 			// TODO: handle exception
