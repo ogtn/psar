@@ -14,8 +14,8 @@ public class PrintNodeListener implements INodeListener {
 	 */
 	@Override
 	public void changeState(INode node, ANodeState oldState, ANodeState newState) {
-		System.out.println("Le noeud \"" + node.getId().getNumericID()
+		/*System.out.println("Le noeud \"" + node.getId().getNumericID()
 				+ "\" passe de l'état " + oldState.getClass().getSimpleName()
-				+ "\" à \"" + newState.getClass().getSimpleName() + "\"");
+				+ "\" à \"" + newState.getClass().getSimpleName() + "\"");*/
 	}
 }

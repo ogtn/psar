@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageConnect;
@@ -16,7 +16,7 @@ public class StateConnectedWaitRange extends ANodeState {
 
 	private MessageConnectTo msg;
 	
-	StateConnectedWaitRange(INetwork network, Queue<AMessage> queue, Node node,
+	StateConnectedWaitRange(INetwork network, BlockingQueue<AMessage> queue, Node node,
 			Range range, MessageConnectTo msg) {
 		super(network, queue, node, range);
 		this.msg = msg;
