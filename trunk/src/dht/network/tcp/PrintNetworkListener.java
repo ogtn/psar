@@ -3,6 +3,7 @@ package dht.network.tcp;
 import dht.INetworkListener;
 import dht.INode;
 import dht.message.AMessage;
+import dht.message.MessagePing;
 
 /**
  * Listener d'affichage sur la sortie standard des évènements réseaux.
@@ -21,10 +22,13 @@ public class PrintNetworkListener implements INetworkListener {
 	 */
 	@Override
 	public void recvMessage(AMessage message, INode node) {
-		System.out.println("Le noeud : \"" + node.getId().getNumericID()
-				+ "\" reçoit un message \""
-				+ message.getClass().getSimpleName() + "\" de \""
-				+ message.getSource().getNumericID() + "\" envoyé par \""
-				+ message.getOriginalSource().getNumericID() + "\"");
+
+		//if (message instanceof MessagePing) {
+			System.out.println("Le noeud : \"" + node.getId().getNumericID()
+					+ "\" reçoit un message \""
+					+ message.getClass().getSimpleName() + "\" de \""
+					+ message.getSource().getNumericID() + "\" envoyé par \""
+					+ message.getOriginalSource().getNumericID() + "\"");
+		//}
 	}
 }

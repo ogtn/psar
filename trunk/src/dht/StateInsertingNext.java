@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import dht.Range.Data;
 import dht.message.AMessage;
@@ -19,7 +19,7 @@ public class StateInsertingNext extends ANodeState {
 	private final MessageAskConnection msg;
 	private UInt oldEndRange;
 
-	StateInsertingNext(INetwork network, Queue<AMessage> queue, Node node,
+	StateInsertingNext(INetwork network, BlockingQueue<AMessage> queue, Node node,
 			Range range, MessageAskConnection msg) {
 		super(network, queue, node, range);
 		this.msg = msg;

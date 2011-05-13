@@ -21,7 +21,9 @@ class NetworkMessage implements Serializable {
 		/* Lorsque l'on envoie un messsage via un canal */
 		MESSAGE_IN_CHANNEL,
 		/* Lorsque l'on envoie un messsage via un canal ouvert temporairement */
-		MESSAGE_OUT_CHANNEL
+		MESSAGE_OUT_CHANNEL,
+		/* Lorsque l'on envoie un messsage de ACK */
+		MESSAGE_ACK
 	}
 
 	private static final long serialVersionUID = 1L;

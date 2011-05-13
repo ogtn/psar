@@ -1,6 +1,7 @@
 package dht;
 
-import java.util.Queue;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageBeginRange;
@@ -14,7 +15,7 @@ import dht.message.MessageReturnGet;
 public class StatePreviousDisconnecting extends ANodeState {
 
 	// Constructeur appellé qd le prévious doit de nous tranferer les datas
-	StatePreviousDisconnecting(INetwork network, Queue<AMessage> queue,
+	StatePreviousDisconnecting(INetwork network, BlockingQueue<AMessage> queue,
 			Node node, Range range, final MessageData msg) {
 		super(network, queue, node, range);
 		process(msg);
@@ -22,7 +23,7 @@ public class StatePreviousDisconnecting extends ANodeState {
 
 	// Constructeur appellé qd le prévious doit nous tranferer sa plage mais n'a
 	// pas de datas
-	StatePreviousDisconnecting(INetwork network, Queue<AMessage> queue,
+	StatePreviousDisconnecting(INetwork network, BlockingQueue<AMessage> queue,
 			Node node, Range range, final MessageBeginRange msg) {
 		super(network, queue, node, range);
 		process(msg);

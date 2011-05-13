@@ -32,6 +32,8 @@ import dht.tools.Tools;
  */
 class NetworkTCP implements INetwork {
 
+	private static final int NETWORK_TIMEOUT = 100;
+
 	private INode node;
 	private Selector selector;
 	private TCPId nextId;
@@ -126,7 +128,6 @@ class NetworkTCP implements INetwork {
 			socketChannel.write(bufferSize);
 			// Ecriture de l'objet
 			socketChannel.write(bufferObject);
-
 		} finally {
 			Tools.close(bos);
 			Tools.close(oos);
@@ -201,6 +202,63 @@ class NetworkTCP implements INetwork {
 		return (T) ois.readObject();
 	}
 
+	// TODO
+	private <T extends Serializable> T nonBlockingReadObject(
+			SocketChannel socketChannel) throws IOException,
+			ClassNotFoundException {
+
+		ByteBuffer bufferSize = null, bufferObject = null;
+		int objectSize = 0;
+		byte[] data = null;
+		int nbRead = 0, cptRead = 0;
+
+		// Récupération de la taille de l'objet
+		bufferSize = ByteBuffer.allocateDirect(4);
+		do {
+			nbRead = socketChannel.read(bufferSize);
+
+			// Si la connexion a été coupée
+			if (nbRead == -1)
+				throw new EOFException();
+			else if (nbRead == 0)
+				return null;
+
+			cptRead += nbRead;
+
+		} while (cptRead != 4);
+
+		bufferSize.flip();
+		objectSize = bufferSize.getInt();
+
+		// Récupération de l'objet dans un buffer de byte puis dans un tableau
+		bufferObject = ByteBuffer.allocateDirect(objectSize);
+		cptRead = 0;
+		do {
+			nbRead = socketChannel.read(bufferObject);
+
+			// Si la connexion a été coupée
+			if (nbRead == -1)
+				throw new EOFException();
+			else if (nbRead == 0)
+				return null;
+
+			cptRead += nbRead;
+
+		} while (cptRead != objectSize);
+
+		bufferObject.flip();
+
+		// Récupération dans un tableau de byte
+		data = new byte[bufferObject.capacity()];
+		bufferObject.get(data, 0, data.length);
+
+		// Lecture de l'objet depuis le tableau de byte
+		ByteArrayInputStream bis = new ByteArrayInputStream(data);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+
+		return (T) ois.readObject();
+	}
+
 	/**
 	 * Convertit un identifiant de noeud en identifiant de réseau TCP.
 	 * 
@@ -256,7 +314,14 @@ class NetworkTCP implements INetwork {
 
 			if (nextChannel != null)
 				throw new IllegalStateException("Channel is already open.");
-			nextChannel = SocketChannel.open(tcpId.getAddress());
+			nextChannel = SocketChannel.open();
+
+			nextChannel.socket().setReuseAddress(true);
+
+			nextChannel.socket().connect(tcpId.getAddress(), NETWORK_TIMEOUT);
+
+			nextChannel.configureBlocking(false);
+
 			nextId = tcpId;
 			writeObject(nextChannel,
 					new NetworkMessage(Type.OPEN_CHANNEL, null));
@@ -306,6 +371,25 @@ class NetworkTCP implements INetwork {
 			writeObject(nextChannel, new NetworkMessage(
 					Type.MESSAGE_IN_CHANNEL, message));
 			fireSendMessage(message);
+
+			try {
+				System.out.println(message);
+				System.out.println("Before sleeep");
+				Thread.sleep(5000);
+				System.out.println("After slip");
+
+				NetworkMessage netMsg = this
+						.<NetworkMessage> nonBlockingReadObject(nextChannel);
+
+				if(netMsg == null)
+					throw new ChannelCloseException(nextId);
+				
+			} catch (ClassNotFoundException e) {
+				throw new NetworkException(e);
+			} catch (InterruptedException e) {
+				throw new NetworkException(e);
+			}
+
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		}
@@ -366,6 +450,7 @@ class NetworkTCP implements INetwork {
 						}
 					} else if (netMsg.getType() == Type.MESSAGE_OUT_CHANNEL) {
 						msg = netMsg.getContent();
+						sc.close();
 					} else {
 						throw new IllegalStateException("Unknown type");
 					}
@@ -386,6 +471,10 @@ class NetworkTCP implements INetwork {
 						}
 					} else if (netMsg.getType() == Type.MESSAGE_IN_CHANNEL) {
 						msg = netMsg.getContent();
+						System.out.println("On ecrit kle ACK 1");
+						writeObject(sc, new NetworkMessage(Type.MESSAGE_ACK, null));
+						System.out.println("On ecrit kle ACK 2");
+						
 					} else {
 						throw new IllegalStateException("Unknown type");
 					}

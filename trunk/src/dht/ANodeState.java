@@ -1,7 +1,7 @@
 package dht;
 
 import java.util.Iterator;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -21,11 +21,12 @@ import dht.message.MessageReturnGet;
 public abstract class ANodeState {
 
 	protected INetwork network;
-	protected Queue<AMessage> queue;
+	protected BlockingQueue<AMessage> queue;
 	protected Node node;
 	protected Range range;
 
-	ANodeState(INetwork network, Queue<AMessage> queue, Node node, Range range) {
+	ANodeState(INetwork network, BlockingQueue<AMessage> queue, Node node,
+			Range range) {
 		this.network = network;
 		this.queue = queue;
 		this.node = node;
@@ -36,6 +37,7 @@ public abstract class ANodeState {
 
 		Iterator<AMessage> iter = queue.iterator();
 
+		/* On trouve, dans la file, un message que l'on peut traiter */
 		while (iter.hasNext()) {
 			AMessage msg = iter.next();
 
@@ -45,13 +47,21 @@ public abstract class ANodeState {
 			}
 		}
 
+		/* Sinon */
 		while (true) {
-			AMessage msg = network.receive(true);
+			AMessage msg;
+			try {
+				synchronized (queue) {
+					msg = queue.take();
 
-			if (isAcceptable(msg))
-				return msg;
-			else
-				queue.add(msg);
+					if (isAcceptable(msg)) {
+						return msg;
+					} else
+						queue.wait();
+				}
+			} catch (InterruptedException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 
@@ -123,10 +133,9 @@ public abstract class ANodeState {
 	}
 
 	void process(MessagePing msg) {
-		
+
 		if (msg.getOriginalSource().equals(node.getId())
 				&& msg.getSource().equals(node.getId()) == false) {
-			
 		} else {
 			network.sendInChannel(node.getNext(), msg);
 		}

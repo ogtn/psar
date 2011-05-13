@@ -123,6 +123,77 @@ class Main {
 			}
 		}
 	}
+	
+	private static void randomDeco(final int n) {
+
+		List<TCPId> ids = new LinkedList<TCPId>();
+		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
+		List<Thread> threads = new LinkedList<Thread>();
+		List<Node> nodes = new LinkedList<Node>();
+
+		for (int cpt = 0; cpt < n; cpt++)
+			ids.add(new TCPId(new UInt((long) (Math.random() * 1000) /*
+																	 * Range.
+																	 * MAX_KEY
+																	 */),
+					new InetSocketAddress(1515 + cpt)));
+
+		for (int cpt = 0; cpt < n; cpt++)
+			if (cpt != 0)
+				connectedNodes.put(ids.get(cpt).getNumericID(), ids.get(0));
+			else
+				connectedNodes.put(ids.get(cpt).getNumericID(), null);
+
+		init(ids, connectedNodes, threads, nodes);
+
+		for (Thread t : threads) {
+			t.start();
+
+			try {
+				t.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// TODO syncronizerdd
+		nodes.get(0).ping();
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("aaaaaaa");
+		
+		threads.get(1).interrupt();
+		
+		System.out.println("bbbb");
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		while(true)
+		{
+			nodes.get(0).ping();
+		}
+		
+		
+		/*
+		for (Thread t : threads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}*/
+	}
+
+	
 
 	private static void coranAlternatif() {
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
@@ -593,7 +664,7 @@ class Main {
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			// contigue(10);
-			random(10);
+			randomDeco(10);
 			// cokeAndPut(3);
 			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?

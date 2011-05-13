@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -15,7 +15,7 @@ import dht.message.MessageLeave;
 
 public class StateConnected extends ANodeState {
 
-	StateConnected(INetwork network, Queue<AMessage> queue, Node node,
+	StateConnected(INetwork network, BlockingQueue<AMessage> queue, Node node,
 			Range range) {
 		super(network, queue, node, range);
 	}

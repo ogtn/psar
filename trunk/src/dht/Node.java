@@ -1,9 +1,9 @@
 package dht;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
@@ -31,7 +31,7 @@ public class Node implements INode, Runnable {
 	private ANodeId previous;
 	private final Range range;
 	private ANodeState state;
-	private final Queue<AMessage> queue;
+	private final BlockingQueue<AMessage> queue;
 	// Valeur de retour du get
 	private Object returnGet;
 	private List<INodeListener> listeners;
@@ -47,8 +47,7 @@ public class Node implements INode, Runnable {
 	 */
 	public Node(INetwork inetwork, ANodeId id) {
 		// Lorsqu'il n'a pas de voisins un noeud boucle sur lui même
-
-		queue = new LinkedList<AMessage>();
+		queue = new LinkedBlockingQueue<AMessage>();
 		this.inetwork = inetwork;
 		this.id = id;
 		next = id;
@@ -71,7 +70,7 @@ public class Node implements INode, Runnable {
 	 *            connecter.
 	 */
 	public Node(INetwork inetwork, ANodeId id, ANodeId firstNode) {
-		queue = new LinkedList<AMessage>();
+		queue = new LinkedBlockingQueue<AMessage>();
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
@@ -96,6 +95,16 @@ public class Node implements INode, Runnable {
 	public void run() {
 		// Initialisation de la couche réseau
 		inetwork.init(this);
+
+		new Thread() {
+			public void run() {
+				while (true) {
+					synchronized (queue) {
+						queue.add(inetwork.receive(true));	
+					}
+				}
+			};
+		}.start();
 
 		// Je me connecte
 		setState(new StateConnecting(inetwork, queue, this, range));

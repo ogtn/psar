@@ -1,6 +1,6 @@
 package dht;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import dht.Range.Data;
 import dht.message.AMessage;
@@ -19,7 +19,7 @@ public class StateDisconnecting extends ANodeState {
 	// et que l'on vide les messages pendants dans la file, false sinon.
 	private boolean dataTransfered;
 
-	StateDisconnecting(INetwork network, Queue<AMessage> queue, Node node,
+	StateDisconnecting(INetwork network, BlockingQueue<AMessage> queue, Node node,
 			Range range) {
 		super(network, queue, node, range);
 	}

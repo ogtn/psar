@@ -93,6 +93,16 @@ public interface INetwork {
 		}
 	}
 
+	// TODO
+	public static class ChannelCloseException extends RuntimeException {
+
+		private ANodeId channelId;
+
+		public ChannelCloseException(ANodeId channelId) {
+			this.channelId = channelId;
+		}
+	}
+
 	/**
 	 * Crée et initialise la couche réseau, doit être appellé avant tout envoi
 	 * ou réception de message.
@@ -178,13 +188,13 @@ public interface INetwork {
 	 *             réseau se produit.
 	 */
 	AMessage receive(boolean isBlocking) throws NetworkException;
-	
+
 	/**
 	 * 
 	 * @param listener
 	 */
 	void addNetworkListener(INetworkListener listener);
-	
+
 	/**
 	 * 
 	 * @param listener
