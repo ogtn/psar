@@ -1,7 +1,9 @@
 package dht;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,6 +16,8 @@ import dht.message.MessageData;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
+import dht.message.MessageEventConnect;
+import dht.message.MessageEventDisconnect;
 import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
@@ -28,10 +32,12 @@ public class Node implements INode, Runnable {
 	private final ANodeId id;
 	private final INetwork inetwork;
 	private ANodeId next;
+	private ANodeId nextShortcut;
 	private ANodeId previous;
 	private final Range range;
 	private ANodeState state;
 	private final BlockingQueue<AMessage> queue;
+	private final Queue<AMessage> buffer;
 	// Valeur de retour du get
 	private Object returnGet;
 	private List<INodeListener> listeners;
@@ -51,9 +57,11 @@ public class Node implements INode, Runnable {
 		this.inetwork = inetwork;
 		this.id = id;
 		next = id;
+		nextShortcut = null;
 		previous = null;
 		range = new Range(id.getNumericID());
-		state = new StateDisconnected(inetwork, queue, this, range);
+		buffer = new LinkedList<AMessage>();
+		state = new StateDisconnected(inetwork, queue, this, range, buffer);
 		listeners = new ArrayList<INodeListener>();
 	}
 
@@ -74,9 +82,11 @@ public class Node implements INode, Runnable {
 		this.inetwork = inetwork;
 		this.id = id;
 		next = firstNode;
+		nextShortcut = null;
 		previous = null;
 		range = new Range();
-		state = new StateDisconnected(inetwork, queue, this, range);
+		buffer = new LinkedList<AMessage>();
+		state = new StateDisconnected(inetwork, queue, this, range, buffer);
 		listeners = new ArrayList<INodeListener>();
 	}
 
@@ -100,14 +110,14 @@ public class Node implements INode, Runnable {
 			public void run() {
 				while (true) {
 					synchronized (queue) {
-						queue.add(inetwork.receive(true));	
+						queue.add(inetwork.receive());
 					}
 				}
 			};
 		}.start();
 
 		// Je me connecte
-		setState(new StateConnecting(inetwork, queue, this, range));
+		setState(new StateConnecting(inetwork, queue, this, range, buffer));
 
 		// On sort quand on arrive dans l'état déconnecté
 		while (!(state instanceof StateDisconnected)) {
@@ -143,6 +153,10 @@ public class Node implements INode, Runnable {
 				state.process((MessageLeave) msg);
 			} else if (msg instanceof MessageReturnGet) {
 				state.process((MessageReturnGet) msg);
+			} else if (msg instanceof MessageEventConnect) {
+				state.process((MessageEventConnect) msg);
+			} else if (msg instanceof MessageEventDisconnect) {
+				state.process((MessageEventDisconnect) msg);
 			} else
 				System.err.println("Kernel panic dans "
 						+ this.getClass().getName() + " pr msg : '" + msg
@@ -196,6 +210,14 @@ public class Node implements INode, Runnable {
 
 	void setNext(ANodeId next) {
 		this.next = next;
+	}
+
+	public ANodeId getNextShortcut() {
+		return nextShortcut;
+	}
+
+	void setNextShortcut(ANodeId nextShortcut) {
+		this.nextShortcut = nextShortcut;
 	}
 
 	void setPrevious(ANodeId prev) {

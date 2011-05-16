@@ -2,6 +2,7 @@ package dht.tools;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.channels.Selector;
 
 /**
  * Classe utilitaire.
@@ -24,5 +25,14 @@ public class Tools {
 			}
 		}
 
+	}
+
+	public static void close(Selector selector) {
+		try {
+			if (selector != null)
+				selector.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -96,11 +96,18 @@ public interface INetwork {
 	// TODO
 	public static class ChannelCloseException extends RuntimeException {
 
+		private static final long serialVersionUID = 1L;
 		private ANodeId channelId;
 
 		public ChannelCloseException(ANodeId channelId) {
 			this.channelId = channelId;
 		}
+
+		public ChannelCloseException(ANodeId channelId, Throwable t) {
+			super(t);
+			this.channelId = channelId;
+		}
+
 	}
 
 	/**
@@ -178,16 +185,12 @@ public interface INetwork {
 	 * Méthode bloquante permettant la récupération d'un message depuis la
 	 * couche réseau.
 	 * 
-	 * @param isBlocking
-	 *            <code>true</code> si la réception est bloquante,
-	 *            <code>false</code> sinon.
-	 * 
 	 * @return Le message reçu.
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
 	 */
-	AMessage receive(boolean isBlocking) throws NetworkException;
+	AMessage receive() throws NetworkException;
 
 	/**
 	 * 

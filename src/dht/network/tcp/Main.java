@@ -15,7 +15,7 @@ class Main {
 
 	static private final PrintNetworkListener netList = new PrintNetworkListener();
 	static private final PrintNodeListener nodeList = new PrintNodeListener();
-	
+
 	static void init(List<TCPId> ids, Map<UInt, TCPId> connectedNodes,
 			List<Thread> threads, List<Node> nodes) {
 
@@ -32,7 +32,7 @@ class Main {
 				node.addINodeListener(nodeList);
 			}
 			nodes.add(node);
-			
+
 			threads.add(new Thread(node));
 		}
 	}
@@ -58,18 +58,17 @@ class Main {
 		for (Thread t : threads) {
 			t.start();
 			/*
-			 * try { t.sleep(1000); } catch (InterruptedException e) {
-			 * e.printStackTrace(); }
+			 * try { t.sleep(5000); nodes.get(0).ping(); } catch
+			 * (InterruptedException e) { e.printStackTrace(); }
 			 */
 		}
 
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(10000);
+			nodes.get(0).ping();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// TODO syncronizerdd
-		nodes.get(0).ping();
 
 		for (Thread t : threads) {
 			try {
@@ -105,11 +104,16 @@ class Main {
 		for (Thread t : threads) {
 			t.start();
 
-			try {
-				t.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			/*
+			 * try { t.sleep(5000); } catch (InterruptedException e) {
+			 * e.printStackTrace(); }
+			 */
+		}
+
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 		// TODO syncronizerdd
@@ -123,7 +127,7 @@ class Main {
 			}
 		}
 	}
-	
+
 	private static void randomDeco(final int n) {
 
 		List<TCPId> ids = new LinkedList<TCPId>();
@@ -156,44 +160,42 @@ class Main {
 			}
 		}
 
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		// TODO syncronizerdd
 		nodes.get(0).ping();
-		
+
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println("aaaaaaa");
-		
+
 		threads.get(1).interrupt();
-		
+
 		System.out.println("bbbb");
-		
+
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		while(true)
-		{
+
+		while (true) {
 			nodes.get(0).ping();
 		}
-		
-		
-		/*
-		for (Thread t : threads) {
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}*/
-	}
 
-	
+		/*
+		 * for (Thread t : threads) { try { t.join(); } catch
+		 * (InterruptedException e) { e.printStackTrace(); } }
+		 */
+	}
 
 	private static void coranAlternatif() {
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
@@ -302,26 +304,35 @@ class Main {
 
 		init(ids, connectedNodes, threads, nodes);
 
+		System.out.println("threads.size() " + threads.size());
+
+		threads.get(0).start();
+
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		for (Entry<UInt, Object> entry : data.entrySet()) {
+			nodes.get(0).put(entry.getKey(), entry.getValue());
+		}
+
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 		int cpt = 0;
 		for (Thread t : threads) {
-			t.start();
-
-			try {
-				t.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			if (cpt == 0) {
-				for (Entry<UInt, Object> entry : data.entrySet()) {
-					nodes.get(0).put(entry.getKey(), entry.getValue());
-				}
-			}
+			if (cpt != 0)
+				t.start();
 			cpt++;
 		}
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -332,7 +343,7 @@ class Main {
 		nodes.get(0).ping();
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -350,7 +361,7 @@ class Main {
 		}
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -564,7 +575,7 @@ class Main {
 			}
 		}
 	}
-	
+
 	public static void leaveMyAss(int n) {
 
 		Random generator = new Random();
@@ -606,7 +617,7 @@ class Main {
 
 			if (cpt == 0) {
 				try {
-					t.sleep(1000);
+					t.sleep(500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -615,16 +626,10 @@ class Main {
 				}
 			}
 			cpt++;
-
-			try {
-				t.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -633,7 +638,7 @@ class Main {
 		nodes.get(0).ping();
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -644,7 +649,7 @@ class Main {
 		nodes.get(1).leave();
 
 		try {
-			Thread.sleep(500);
+			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -664,11 +669,14 @@ class Main {
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			// contigue(10);
-			randomDeco(10);
-			// cokeAndPut(3);
+
+			// random(10);
+
+			// randomDeco(10);
+			// cokeAndPut(5);
 			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?
-			// leaveMyAss(5);
+			leaveMyAss(5);
 			// leaveMyLittleAss();
 			// coranAlternatif();
 		} catch (Exception e) {

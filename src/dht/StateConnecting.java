@@ -1,10 +1,12 @@
 package dht;
 
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageConnectTo;
+import dht.message.MessageEventConnect;
 
 /**
  * Etat du noeud qui est entrain de rejoindre l'anneau.
@@ -12,8 +14,8 @@ import dht.message.MessageConnectTo;
 public class StateConnecting extends ANodeState {
 
 	StateConnecting(INetwork inetwork, BlockingQueue<AMessage> queue,
-			Node node, Range range) {
-		super(inetwork, queue, node, range);
+			Node node, Range range, Queue<AMessage> buffer) {
+		super(inetwork, queue, node, range, buffer);
 	}
 
 	@Override
@@ -31,7 +33,7 @@ public class StateConnecting extends ANodeState {
 			// Etablissement d'un connexion bouclante vers moi même
 			network.openChannel(node.getNext());
 			node.setPrevious(node.getId());
-			node.setState(new StateConnected(network, queue, node, range));
+			node.setState(new StateConnected(network, queue, node, range, buffer));
 		} else {
 			// Envoi d'un message de demande de connexion
 			network.sendTo(node.getNext(),
@@ -44,11 +46,7 @@ public class StateConnecting extends ANodeState {
 	 */
 	@Override
 	void process(MessageConnectTo msg) {
-		/*
-		 * Je suis en attente de connexion à l'anneau et viens de recevoir un
-		 * message me disant à qui me connecter
-		 */
-
-		node.setState(new StateConnectedWaitRange(network, queue, node, range, msg));
+		node.setState(new StateConnectedWaitRange(network, queue, node, range,
+				msg, buffer));
 	}
 }

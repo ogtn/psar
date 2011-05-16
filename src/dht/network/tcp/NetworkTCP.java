@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -64,6 +65,8 @@ class NetworkTCP implements INetwork {
 	@Override
 	public void init(INode node) throws NetworkException {
 
+		System.out.println("	Le noeud + " + node.getId().getNumericID() + " fait son init");
+		
 		ServerSocketChannel ssChan = null;
 
 		try {
@@ -80,8 +83,14 @@ class NetworkTCP implements INetwork {
 			ssChan = ServerSocketChannel.open();
 			// Non bloquante
 			ssChan.configureBlocking(false);
+			// Réutilisation de l'adresse
+			ssChan.socket().setReuseAddress(true);
 			// Acquisition de l'adresse socket
 			ssChan.socket().bind(narrowToNetworkId(node.getId()).getAddress());
+			/*
+			 * ssChan.socket().bind( new InetSocketAddress("0.0.0.0",
+			 * narrowToNetworkId( node.getId()).getAddress().getPort()));
+			 */
 			// Enregistre notre serveur
 			ssChan.register(selector, SelectionKey.OP_ACCEPT);
 			this.node = node;
@@ -294,7 +303,7 @@ class NetworkTCP implements INetwork {
 			next = SocketChannel.open(tcpId.getAddress());
 			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
 					message));
-			fireSendMessage(message);
+			fireSendMessage(message, id);
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		} finally {
@@ -370,20 +379,17 @@ class NetworkTCP implements INetwork {
 		try {
 			writeObject(nextChannel, new NetworkMessage(
 					Type.MESSAGE_IN_CHANNEL, message));
-			fireSendMessage(message);
+			fireSendMessage(message, id);
 
 			try {
-				System.out.println(message);
-				System.out.println("Before sleeep");
-				Thread.sleep(5000);
-				System.out.println("After slip");
+				Thread.sleep(NETWORK_TIMEOUT);
 
 				NetworkMessage netMsg = this
 						.<NetworkMessage> nonBlockingReadObject(nextChannel);
 
-				if(netMsg == null)
+				if (netMsg == null)
 					throw new ChannelCloseException(nextId);
-				
+
 			} catch (ClassNotFoundException e) {
 				throw new NetworkException(e);
 			} catch (InterruptedException e) {
@@ -391,7 +397,7 @@ class NetworkTCP implements INetwork {
 			}
 
 		} catch (IOException e) {
-			throw new NetworkException(e);
+			throw new ChannelCloseException(nextId, e);
 		}
 	}
 
@@ -399,38 +405,40 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AMessage receive(boolean isBlocking) throws NetworkException {
+	public AMessage receive() throws NetworkException {
 
 		AMessage msg = null;
 		NetworkMessage netMsg = null;
 		SocketChannel sc = null;
 		ServerSocketChannel server = null;
 
-		try {
-			Iterator<SelectionKey> keys = null;
-			SelectionKey key = null;
+		// try {
+		Iterator<SelectionKey> keys = null;
+		SelectionKey key = null;
 
-			// On ne sort pas la boucle tant que l'on a pas reçu un message
-			while (msg == null) {
+		// On ne sort pas la boucle tant que l'on a pas reçu un message
+		while (msg == null) {
 
-				if (isBlocking)
-					// Attente d'un évènement sur nos sockets
-					selector.select();
-				else if (selector.selectNow() == 0)
-					return null;
+			try {
+				// Attente d'un évènement sur nos sockets
+				selector.select();
+			} catch (IOException e) {
+				Tools.close(selector);
+				throw new NetworkException(e);
+			}
+			// Clés des sockets ayant reçu un évènement
+			keys = selector.selectedKeys().iterator();
 
-				// Clés des sockets ayant reçu un évènement
-				keys = selector.selectedKeys().iterator();
-
-				// On traite la première clé activée
-				key = keys.next();
-				keys.remove();
-
+			// On traite la première clé activée
+			key = keys.next();
+			keys.remove();
+			try {
 				// Nouvelle connexion sur notre serveur
 				if (key.isValid() && key.isAcceptable()) {
 
 					server = (ServerSocketChannel) key.channel();
 					sc = server.accept();
+					
 					netMsg = this.<NetworkMessage> readObject(sc);
 
 					if (netMsg.getType() == Type.OPEN_CHANNEL) {
@@ -454,6 +462,7 @@ class NetworkTCP implements INetwork {
 					} else {
 						throw new IllegalStateException("Unknown type");
 					}
+
 					// Envoi de message par un de nos predecesseur
 				} else if (key.isValid() && key.isReadable()) {
 
@@ -471,27 +480,32 @@ class NetworkTCP implements INetwork {
 						}
 					} else if (netMsg.getType() == Type.MESSAGE_IN_CHANNEL) {
 						msg = netMsg.getContent();
-						System.out.println("On ecrit kle ACK 1");
-						writeObject(sc, new NetworkMessage(Type.MESSAGE_ACK, null));
-						System.out.println("On ecrit kle ACK 2");
-						
+						writeObject(sc, new NetworkMessage(Type.MESSAGE_ACK,
+								null));
 					} else {
 						throw new IllegalStateException("Unknown type");
 					}
 				} else {
 					throw new IllegalStateException("Invalid key");
 				}
+			} catch (IOException e) {
+				pendingConnections.remove(sc);
+				// Désenregistre la connexion si elle l'était
+				Tools.close(sc);
+				key.cancel();
+			} catch (ClassNotFoundException e) {
+				Tools.close(server);
+				Tools.close(sc);
+				throw new NetworkException(e);
 			}
-
-		} catch (IOException e) {
-			Tools.close(server);
-			Tools.close(sc);
-			throw new NetworkException(e);
-		} catch (ClassNotFoundException e) {
-			Tools.close(server);
-			Tools.close(sc);
-			throw new NetworkException(e);
 		}
+
+		/*
+		 * } catch (IOException e) { Tools.close(server); Tools.close(sc); throw
+		 * new NetworkException(e); } catch (ClassNotFoundException e) {
+		 * Tools.close(server); Tools.close(sc); throw new NetworkException(e);
+		 * }
+		 */
 
 		fireRecvMessage(msg);
 
@@ -526,10 +540,10 @@ class NetworkTCP implements INetwork {
 	 * @param message
 	 *            Les messages envoyés.
 	 */
-	private void fireSendMessage(AMessage message) {
+	private void fireSendMessage(AMessage message, ANodeId id) {
 		for (INetworkListener listener : listeners) {
 			try {
-				listener.sendMessage(message, node);
+				listener.sendMessage(message, node, id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

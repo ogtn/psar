@@ -10,6 +10,8 @@ public interface INode {
 	 */
 	ANodeId getId();
 
+	ANodeId getNextShortcut();
+	
 	void ping();
 	
 	void put(UInt key, Object data);

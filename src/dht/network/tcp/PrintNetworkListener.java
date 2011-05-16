@@ -1,5 +1,6 @@
 package dht.network.tcp;
 
+import dht.ANodeId;
 import dht.INetworkListener;
 import dht.INode;
 import dht.message.AMessage;
@@ -14,7 +15,10 @@ public class PrintNetworkListener implements INetworkListener {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendMessage(AMessage message, INode node) {
+	public void sendMessage(AMessage message, INode node, ANodeId id) {
+		/*System.out.println("Le noeud : \"" + node.getId().getNumericID()
+				+ "\" envoie un message \""
+				+ message.getClass().getSimpleName() + "\" a \"" + id + "\"");*/
 	}
 
 	/**
@@ -23,12 +27,20 @@ public class PrintNetworkListener implements INetworkListener {
 	@Override
 	public void recvMessage(AMessage message, INode node) {
 
-		//if (message instanceof MessagePing) {
-			System.out.println("Le noeud : \"" + node.getId().getNumericID()
+		if (message instanceof MessagePing) {
+			System.out.println("Le noeud : \"" + node.getId()
 					+ "\" reçoit un message \""
 					+ message.getClass().getSimpleName() + "\" de \""
 					+ message.getSource().getNumericID() + "\" envoyé par \""
-					+ message.getOriginalSource().getNumericID() + "\"");
-		//}
+					+ message.getOriginalSource().getNumericID() + "\""
+					+ " shortcut: " + node.getNextShortcut());
+
+		} else {
+			/*System.out.println("Le noeud : \"" + node.getId().getNumericID()
+					+ "\" reçoit un message \""
+					+ message.getClass().getSimpleName() + "\" de \""
+					+ message.getSource().getNumericID() + "\" envoyé par \""
+					+ message.getOriginalSource().getNumericID() + "\"");*/
+		}
 	}
 }
