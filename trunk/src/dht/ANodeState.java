@@ -1,6 +1,8 @@
 package dht;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
@@ -12,6 +14,8 @@ import dht.message.MessageData;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
+import dht.message.MessageEventConnect;
+import dht.message.MessageEventDisconnect;
 import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
@@ -24,18 +28,20 @@ public abstract class ANodeState {
 	protected BlockingQueue<AMessage> queue;
 	protected Node node;
 	protected Range range;
+	Queue<AMessage> buffer;
 
 	ANodeState(INetwork network, BlockingQueue<AMessage> queue, Node node,
-			Range range) {
+			Range range, Queue<AMessage> buffer) {
 		this.network = network;
 		this.queue = queue;
 		this.node = node;
 		this.range = range;
+		this.buffer = buffer;
 	}
 
 	final AMessage filter() {
 
-		Iterator<AMessage> iter = queue.iterator();
+		Iterator<AMessage> iter = buffer.iterator();
 
 		/* On trouve, dans la file, un message que l'on peut traiter */
 		while (iter.hasNext()) {
@@ -51,14 +57,11 @@ public abstract class ANodeState {
 		while (true) {
 			AMessage msg;
 			try {
-				synchronized (queue) {
-					msg = queue.take();
-
-					if (isAcceptable(msg)) {
-						return msg;
-					} else
-						queue.wait();
-				}
+				msg = queue.take();
+				if (isAcceptable(msg)) {
+					return msg;
+				} else
+					buffer.add(msg);
 			} catch (InterruptedException e) {
 				throw new IllegalStateException(e);
 			}
@@ -72,21 +75,26 @@ public abstract class ANodeState {
 	 */
 	boolean pendingMessages() {
 
-		Iterator<AMessage> iter = queue.iterator();
+		Iterator<AMessage> iter = buffer.iterator();
 
 		while (iter.hasNext()) {
-			AMessage msg = iter.next();
+			if (isAcceptable(iter.next()))
+				return true;
+		}
 
+		while (queue.isEmpty() == false) {
+			AMessage msg;
+			try {
+				msg = queue.take();
+			} catch (InterruptedException e) {
+				throw new IllegalStateException(e);
+			}
+			buffer.add(msg);
 			if (isAcceptable(msg))
 				return true;
 		}
 
-		AMessage msg = network.receive(false);
-		if (msg != null) {
-			queue.add(msg);
-			return true;
-		} else
-			return false;
+		return false;
 	}
 
 	abstract boolean isAcceptable(AMessage msg);
@@ -152,5 +160,32 @@ public abstract class ANodeState {
 	}
 
 	void process(MessageLeave msg) {
+	}
+
+	void process(MessageEventConnect msg) {
+	}
+
+	void process(MessageEventDisconnect msg) {
+
+		msg.incTtl();
+		
+		System.out.println("Le noeud " + node.getId().getNumericID()
+				+ " recoit MessageEventDisconnect ");
+
+		if (node.getNextShortcut() != null
+				&& node.getNextShortcut().equals(msg.getOriginalSource()))
+			node.setNextShortcut(msg.getNext());
+
+		// Je suis suivant du suivant du noeud qui se déconnecte
+		if(msg.getTtl() == 2)
+			msg.setShortcut(node.getId());
+		
+		// Je suis le précédent du noeud qui se déconnecte
+		if (node.getNext().equals(msg.getOriginalSource())) {
+			// Je récupère mon nouveau raccourci
+			node.setNextShortcut(msg.getShortcut());
+		}
+		
+		network.sendInChannel(node.getNext(), msg);
 	}
 }

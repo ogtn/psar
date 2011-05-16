@@ -1,5 +1,6 @@
 package dht;
 
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import dht.Range.Data;
@@ -9,6 +10,7 @@ import dht.message.MessageConnectTo;
 import dht.message.MessageDataRange;
 import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
+import dht.message.MessageEventDisconnect;
 import dht.message.MessageGet;
 import dht.message.MessagePing;
 import dht.message.MessagePut;
@@ -20,8 +22,8 @@ public class StateInsertingNext extends ANodeState {
 	private UInt oldEndRange;
 
 	StateInsertingNext(INetwork network, BlockingQueue<AMessage> queue, Node node,
-			Range range, MessageAskConnection msg) {
-		super(network, queue, node, range);
+			Range range, MessageAskConnection msg, Queue<AMessage> buffer) {
+		super(network, queue, node, range, buffer);
 		this.msg = msg;
 	}
 
@@ -35,7 +37,8 @@ public class StateInsertingNext extends ANodeState {
 		return msg instanceof MessageGet || msg instanceof MessagePut
 				|| msg instanceof MessagePing
 				|| msg instanceof MessageDisconnect
-				|| msg instanceof MessageReturnGet;
+				|| msg instanceof MessageReturnGet
+				|| msg instanceof MessageEventDisconnect;
 	}
 
 	@Override
@@ -91,7 +94,7 @@ public class StateInsertingNext extends ANodeState {
 		network.sendInChannel(node.getNext(), new MessageEndRange(node.getId(),
 				oldEndRange));
 
-		node.setState(new StateConnected(network, queue, node, range));
+		node.setState(new StateConnected(network, queue, node, range, buffer));
 	}
 
 	@Override
