@@ -56,6 +56,7 @@ public class StatePreviousDisconnecting extends ANodeState {
 
 	@Override
 	void process(MessageConnect msg) {
+		node.setPrevious(msg.getOriginalSource());
 		node.setState(new StateConnected(network, queue, node, range, buffer));
 	}
 }

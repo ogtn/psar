@@ -1,0 +1,86 @@
+args.length  3
+====PING!!!!====
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
+noeud : "1000" msg: "MessageAskConnection" de "2000" envoyé par "2000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
+true Le noeud : "1000" envoie un message "MessageConnectTo" a "2000"
+noeud : "1000" msg: "MessageConnect" de "2000" envoyé par "2000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
+true Le noeud : "1000" envoie un message "MessageEndRange" a "2000"
+noeud : "1000" msg: "MessageEventConnect" de "2000" envoyé par "2000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessageEventConnect" a "2000"
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+false Le noeud : "1000" envoie un message "MessagePing" a "1000"
+noeud : "1000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000
+true Le noeud : "1000" envoie un message "MessagePing" a "2000"
+noeud : "1000" msg: "MessagePing" de "2000" envoyé par "1000" shortcut: 1000 prev : id: 2000 adress: ari-31-312-02/132.227.114.194:1515 next : 2000

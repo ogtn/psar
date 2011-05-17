@@ -24,6 +24,7 @@ import dht.INetwork;
 import dht.INetworkListener;
 import dht.INode;
 import dht.message.AMessage;
+import dht.message.MessageFault;
 import dht.network.tcp.NetworkMessage.Type;
 import dht.tools.Tools;
 
@@ -65,8 +66,6 @@ class NetworkTCP implements INetwork {
 	@Override
 	public void init(INode node) throws NetworkException {
 
-		System.out.println("	Le noeud + " + node.getId().getNumericID() + " fait son init");
-		
 		ServerSocketChannel ssChan = null;
 
 		try {
@@ -86,7 +85,9 @@ class NetworkTCP implements INetwork {
 			// Réutilisation de l'adresse
 			ssChan.socket().setReuseAddress(true);
 			// Acquisition de l'adresse socket
-			ssChan.socket().bind(narrowToNetworkId(node.getId()).getAddress());
+			ssChan.socket().bind(
+					new InetSocketAddress("0.0.0.0", narrowToNetworkId(
+							node.getId()).getAddress().getPort()));
 			/*
 			 * ssChan.socket().bind( new InetSocketAddress("0.0.0.0",
 			 * narrowToNetworkId( node.getId()).getAddress().getPort()));
@@ -303,7 +304,7 @@ class NetworkTCP implements INetwork {
 			next = SocketChannel.open(tcpId.getAddress());
 			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
 					message));
-			fireSendMessage(message, id);
+			fireSendMessage(message, id, false);
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		} finally {
@@ -369,7 +370,8 @@ class NetworkTCP implements INetwork {
 	 */
 	@Override
 	public void sendInChannel(ANodeId id, AMessage message)
-			throws ChannelNotFoundException, NetworkException {
+			throws ChannelNotFoundException, NetworkException,
+			ChannelCloseException {
 
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
@@ -379,7 +381,7 @@ class NetworkTCP implements INetwork {
 		try {
 			writeObject(nextChannel, new NetworkMessage(
 					Type.MESSAGE_IN_CHANNEL, message));
-			fireSendMessage(message, id);
+			fireSendMessage(message, id, true);
 
 			try {
 				Thread.sleep(NETWORK_TIMEOUT);
@@ -397,7 +399,24 @@ class NetworkTCP implements INetwork {
 			}
 
 		} catch (IOException e) {
-			throw new ChannelCloseException(nextId, e);
+
+			if (node.getNextShortcut() != null) {
+				nextChannel = null;
+				nextId = null;
+				openChannel(node.getNextShortcut());
+				sendInChannel(id,
+						new MessageFault(node.getId(), node.getNextRange()));
+				sendInChannel(id, message);
+			} else
+				throw new ChannelCloseException(nextId);
+
+		} catch (ChannelCloseException e) {
+			nextChannel = null;
+			if (node.getNextShortcut() != null) {
+				openChannel(node.getNextShortcut());
+				sendInChannel(id, message);
+			} else
+				throw e;
 		}
 	}
 
@@ -438,7 +457,7 @@ class NetworkTCP implements INetwork {
 
 					server = (ServerSocketChannel) key.channel();
 					sc = server.accept();
-					
+
 					netMsg = this.<NetworkMessage> readObject(sc);
 
 					if (netMsg.getType() == Type.OPEN_CHANNEL) {
@@ -540,10 +559,11 @@ class NetworkTCP implements INetwork {
 	 * @param message
 	 *            Les messages envoyés.
 	 */
-	private void fireSendMessage(AMessage message, ANodeId id) {
+	private void fireSendMessage(AMessage message, ANodeId id,
+			boolean isInChannel) {
 		for (INetworkListener listener : listeners) {
 			try {
-				listener.sendMessage(message, node, id);
+				listener.sendMessage(message, node, id, isInChannel);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
