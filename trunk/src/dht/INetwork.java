@@ -177,9 +177,10 @@ public interface INetwork {
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
+	 *             TODO
 	 */
 	void sendInChannel(ANodeId id, AMessage message)
-			throws ChannelNotFoundException, NetworkException;
+			throws ChannelNotFoundException, NetworkException,ChannelCloseException;
 
 	/**
 	 * Méthode bloquante permettant la récupération d'un message depuis la
@@ -189,8 +190,9 @@ public interface INetwork {
 	 * @throws NetworkException
 	 *             Une exception est lancée si une erreur interne à la couché
 	 *             réseau se produit.
+	 *             TODO
 	 */
-	AMessage receive() throws NetworkException;
+	AMessage receive() throws NetworkException, ChannelCloseException;
 
 	/**
 	 * 

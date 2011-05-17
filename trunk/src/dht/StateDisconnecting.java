@@ -8,7 +8,6 @@ import dht.message.AMessage;
 import dht.message.MessageBeginRange;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
-import dht.message.MessageDisconnect;
 import dht.message.MessageEventDisconnect;
 import dht.message.MessageGet;
 import dht.message.MessagePing;
@@ -28,8 +27,8 @@ public class StateDisconnecting extends ANodeState {
 
 	@Override
 	boolean isAcceptable(AMessage msg) {
-		return msg instanceof MessageDisconnect || msg instanceof MessagePut
-				|| msg instanceof MessageGet || msg instanceof MessagePing
+		return msg instanceof MessagePut || msg instanceof MessageGet
+				|| msg instanceof MessagePing
 				|| msg instanceof MessageEventDisconnect;
 	}
 
@@ -51,7 +50,7 @@ public class StateDisconnecting extends ANodeState {
 		Data data = range.shrinkToLast(node.getId().getNumericID());
 
 		while (data != null) {
-			
+
 			network.sendInChannel(node.getNext(), new MessageData(node.getId(),
 					data.getKey(), data.getData()));
 
@@ -60,7 +59,7 @@ public class StateDisconnecting extends ANodeState {
 				// Je vais le traiter via un process
 				return;
 			}
-			
+
 			data = range.shrinkToLast(node.getId().getNumericID());
 		}
 
@@ -72,8 +71,6 @@ public class StateDisconnecting extends ANodeState {
 		network.sendInChannel(node.getNext(),
 				new MessageEventDisconnect(node.getId(), node.getNext()));
 
-		System.out.println(node.getId().getNumericID() + "envoie un msg MessageEventDisconnect ");
-		
 		dataTransfered = true;
 	}
 
@@ -82,17 +79,17 @@ public class StateDisconnecting extends ANodeState {
 
 		// L'évènement annoncant notre déconnexion nous revient
 		if (msg.getOriginalSource().equals(node.getId())) {
-			
-			System.out.println(node.getId().getNumericID() + " MessageEventDisconnect ");
-			
+
 			// Demande à notre précédent de se connecter à notre suivant
 			network.sendTo(node.getPrevious(),
 					new MessageConnectTo(node.getId(), node.getNext()));
 
-			// Fermeture vers le suivant
-			network.sendInChannel(node.getNext(),
-					new MessageDisconnect(node.getId()));
+			// Fermeture du suivant
 			network.closeChannel(node.getNext());
+
+			// Vider la file des messages que l'on ne peut traiter
+			node.setState(new StateDisconnected(network, queue, node, range,
+					buffer));
 		} else {
 			network.sendInChannel(node.getNext(), msg);
 			dataTransfer();
@@ -115,13 +112,5 @@ public class StateDisconnecting extends ANodeState {
 	void process(MessagePing msg) {
 		super.process(msg);
 		dataTransfer();
-	}
-
-	@Override
-	void process(MessageDisconnect msg) {
-		System.out.println("MessageDisconnect");
-
-		// TODO vider la file des messages que l'on ne peut traiter
-		node.setState(new StateDisconnected(network, queue, node, range, buffer));
 	}
 }

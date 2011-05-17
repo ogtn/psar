@@ -14,7 +14,6 @@ import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
 import dht.message.MessageDataRange;
-import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageEventConnect;
 import dht.message.MessageEventDisconnect;
@@ -98,6 +97,11 @@ public class Node implements INode, Runnable {
 		return id;
 	}
 
+	@Override
+	public ANodeId getPrev() {
+		return previous;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -143,8 +147,6 @@ public class Node implements INode, Runnable {
 				state.process((MessageBeginRange) msg);
 			} else if (msg instanceof MessageConnectTo) {
 				state.process((MessageConnectTo) msg);
-			} else if (msg instanceof MessageDisconnect) {
-				state.process((MessageDisconnect) msg);
 			} else if (msg instanceof MessageDataRange) {
 				state.process((MessageDataRange) msg);
 			} else if (msg instanceof MessageEndRange) {
@@ -204,7 +206,9 @@ public class Node implements INode, Runnable {
 		return range;
 	}
 
-	ANodeId getNext() {
+	// TODO virer la visibilité
+	@Override
+	public ANodeId getNext() {
 		return next;
 	}
 
@@ -262,6 +266,17 @@ public class Node implements INode, Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	// TODO virer inutile
+	@Override
+	public ANodeState getState() {
+		return state;
+	}
+
+	@Override
+	public UInt getNextRange() {
+		return new UInt((range.getEnd().toLong() + 1) % UInt.MAX_KEY);
 	}
 
 	@Override

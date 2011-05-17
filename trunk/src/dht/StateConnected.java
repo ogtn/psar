@@ -10,10 +10,9 @@ import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
 import dht.message.MessageDataRange;
-import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageEventConnect;
-import dht.message.MessageEventDisconnect;
+import dht.message.MessageFault;
 import dht.message.MessageLeave;
 
 public class StateConnected extends ANodeState {
@@ -26,9 +25,7 @@ public class StateConnected extends ANodeState {
 	@Override
 	boolean isAcceptable(AMessage msg) {
 		// TODO change
-		return !(msg instanceof MessageConnect)
-				&& !(msg instanceof MessageDataRange)
-				&& !(msg instanceof MessageDisconnect)
+		return !(msg instanceof MessageDataRange)
 				&& !(msg instanceof MessageEndRange);
 	}
 
@@ -76,8 +73,6 @@ public class StateConnected extends ANodeState {
 	 */
 	@Override
 	void process(MessageConnectTo msg) {
-		network.sendInChannel(node.getNext(),
-				new MessageDisconnect(node.getId()));
 		network.closeChannel(node.getNext());
 		node.setNext(msg.getConnectNodeId());
 		network.openChannel(node.getNext());
@@ -119,5 +114,13 @@ public class StateConnected extends ANodeState {
 			// TODO detecter ac le ttl qu'on ne peut pas remplir les shortcuts quand l'anneau est trop petit
 			network.sendInChannel(node.getNext(), msg);
 		}
+	}
+	
+	/**
+	 * TODo
+	 */
+	void process(MessageFault msg) {
+		node.setPrevious(msg.getOriginalSource());
+		range.setBegin(msg.getNewBeginRange());
 	}
 }

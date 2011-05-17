@@ -1,7 +1,6 @@
 package dht;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
@@ -12,10 +11,10 @@ import dht.message.MessageConnect;
 import dht.message.MessageConnectTo;
 import dht.message.MessageData;
 import dht.message.MessageDataRange;
-import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageEventConnect;
 import dht.message.MessageEventDisconnect;
+import dht.message.MessageFault;
 import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
@@ -66,6 +65,9 @@ public abstract class ANodeState {
 				throw new IllegalStateException(e);
 			}
 		}
+
+		// TODO listener sur les msgs delivres
+
 	}
 
 	/**
@@ -119,9 +121,6 @@ public abstract class ANodeState {
 	void process(MessageData msg) {
 	}
 
-	void process(MessageDisconnect msg) {
-	}
-
 	void process(MessageDataRange msg) {
 	}
 
@@ -142,9 +141,9 @@ public abstract class ANodeState {
 
 	void process(MessagePing msg) {
 
-		if (msg.getOriginalSource().equals(node.getId())
-				&& msg.getSource().equals(node.getId()) == false) {
-		} else {
+		if (!((msg.getOriginalSource().equals(node.getId()) && msg.getSource()
+				.equals(node.getId()) == false) || node.getId().equals(
+				node.getNext()))) {
 			network.sendInChannel(node.getNext(), msg);
 		}
 	}
@@ -168,24 +167,25 @@ public abstract class ANodeState {
 	void process(MessageEventDisconnect msg) {
 
 		msg.incTtl();
-		
-		System.out.println("Le noeud " + node.getId().getNumericID()
-				+ " recoit MessageEventDisconnect ");
 
 		if (node.getNextShortcut() != null
 				&& node.getNextShortcut().equals(msg.getOriginalSource()))
 			node.setNextShortcut(msg.getNext());
 
 		// Je suis suivant du suivant du noeud qui se déconnecte
-		if(msg.getTtl() == 2)
+		if (msg.getTtl() == 2)
 			msg.setShortcut(node.getId());
-		
+
 		// Je suis le précédent du noeud qui se déconnecte
 		if (node.getNext().equals(msg.getOriginalSource())) {
 			// Je récupère mon nouveau raccourci
 			node.setNextShortcut(msg.getShortcut());
 		}
-		
+
 		network.sendInChannel(node.getNext(), msg);
+	}
+
+	void process(MessageFault msg) {
+
 	}
 }

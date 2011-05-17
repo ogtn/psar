@@ -1,5 +1,7 @@
 Message d'erreur si identifiant identique : que se passe t-il en cas de messages identiques.
 
+Data : serilizable
+
 Leave
  	-Si un seul noeud
  	-Si deux noeuds

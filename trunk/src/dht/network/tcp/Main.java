@@ -642,8 +642,8 @@ class Main {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// /////////////////////////////////////////////////////////////////
-
+		///////////////////////////////////////////////////////////////////
+		
 		System.out.println("===== " + nodes.get(1).getId() + " se déco : ");
 
 		nodes.get(1).leave();
@@ -668,15 +668,17 @@ class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			// contigue(10);
+			//contigue(10);
+			
+			//contigue(3);
 
 			// random(10);
 
-			// randomDeco(10);
+			randomDeco(10);
 			// cokeAndPut(5);
 			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?
-			leaveMyAss(5);
+			// leaveMyAss(5);
 			// leaveMyLittleAss();
 			// coranAlternatif();
 		} catch (Exception e) {

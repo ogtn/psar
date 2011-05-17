@@ -6,7 +6,7 @@ import dht.ANodeId;
  * Message envoyé par l'<code>INode</code> précédente avant la fermeture d'un
  * lien inter-<code>INode</code>.
  */
-public class MessageDisconnect extends AMessage {
+public class MessageDisconnectOld extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class MessageDisconnect extends AMessage {
 	 *            L'identifiant de l'<code>INode</code> ayant créé et envoyé le
 	 *            message.
 	 */
-	public MessageDisconnect(ANodeId originalSource) {
+	public MessageDisconnectOld(ANodeId originalSource) {
 		super(originalSource);
 	}
 }

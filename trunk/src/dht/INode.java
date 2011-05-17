@@ -18,8 +18,15 @@ public interface INode {
 	
 	void leave();
 	
+	UInt getNextRange();
+	
 	Object get(UInt key);
 
+	// TODO virer cette meth inutiles
+	ANodeState getState();
+	ANodeId getPrev();
+	ANodeId getNext();
+	
 	void addINodeListener(INodeListener listener);
 	
 	void removeINodeListener(INodeListener listener);

@@ -8,7 +8,6 @@ import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageConnectTo;
 import dht.message.MessageDataRange;
-import dht.message.MessageDisconnect;
 import dht.message.MessageEndRange;
 import dht.message.MessageEventDisconnect;
 import dht.message.MessageGet;
@@ -36,7 +35,6 @@ public class StateInsertingNext extends ANodeState {
 		 */
 		return msg instanceof MessageGet || msg instanceof MessagePut
 				|| msg instanceof MessagePing
-				|| msg instanceof MessageDisconnect
 				|| msg instanceof MessageReturnGet
 				|| msg instanceof MessageEventDisconnect;
 	}
@@ -45,8 +43,6 @@ public class StateInsertingNext extends ANodeState {
 	void init() {
 
 		// Déconnexion du suivant
-		network.sendInChannel(node.getNext(),
-				new MessageDisconnect(node.getId()));
 		network.closeChannel(node.getNext());
 
 		// Etablissement de la connexion vers le nouveau suivant
@@ -111,12 +107,6 @@ public class StateInsertingNext extends ANodeState {
 
 	@Override
 	void process(MessagePing msg) {
-		super.process(msg);
-		dataTransfer();
-	}
-
-	@Override
-	void process(MessageDisconnect msg) {
 		super.process(msg);
 		dataTransfer();
 	}
