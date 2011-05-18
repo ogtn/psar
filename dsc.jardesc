@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="/users/nfs/Etu8/3069618/node3.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/psar/dsc.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=psar/src&lt;dht.network.tcp{MainJar.java[MainJar" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/psar/31-312.txt"/>
+        <file path="/psar/graph.dot"/>
+        <javaElement handleIdentifier="=psar/src"/>
+        <file path="/psar/.classpath"/>
+        <javaElement handleIdentifier="=psar/test"/>
+        <file path="/psar/fsm.png"/>
+        <file path="/psar/.project"/>
+        <file path="/psar/fsm.dot"/>
+        <file path="/psar/tayste.c"/>
+        <file path="/psar/TODO"/>
+        <file path="/psar/monitor.c"/>
+        <file path="/psar/graph.txt"/>
+    </selectedElements>
+</jardesc>
