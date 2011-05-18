@@ -11,3 +11,15 @@ Détection de code mort
  	-Quand déconnexion, on doit vider notre file de requêtes.
  
  Envoyer un seriliazble au lieu d'un object
+
+ Pas de gestion des deco ac un noeud restant OSEF
+
+ Shortucut foire quand deco sauvage
+
+ Interfaces reseaux envoi vers un neoud local ac notre ip public -> fail. WTF!!!
+
+Ctrl + D ne fonctionne pas dans MainConsole
+
+Dans MainConsole faire la reco
+
+listener dans fichier (+ graphviz???)

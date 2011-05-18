@@ -29,8 +29,7 @@ public abstract class ANodeState {
 	protected Range range;
 	Queue<AMessage> buffer;
 
-	ANodeState(INetwork network, BlockingQueue<AMessage> queue, Node node,
-			Range range, Queue<AMessage> buffer) {
+	ANodeState(INetwork network, BlockingQueue<AMessage> queue, Node node, Range range, Queue<AMessage> buffer) {
 		this.network = network;
 		this.queue = queue;
 		this.node = node;
@@ -129,8 +128,7 @@ public abstract class ANodeState {
 
 	void process(MessageGet msg) {
 		if (range.inRange(msg.getKey())) {
-			network.sendTo(msg.getOriginalSource(),
-					new MessageReturnGet(node.getId(), range.get(msg.getKey())));
+			network.sendTo(msg.getOriginalSource(), new MessageReturnGet(node.getId(), range.get(msg.getKey())));
 		} else
 			network.sendInChannel(node.getNext(), msg);
 	}
@@ -141,9 +139,8 @@ public abstract class ANodeState {
 
 	void process(MessagePing msg) {
 
-		if (!((msg.getOriginalSource().equals(node.getId()) && msg.getSource()
-				.equals(node.getId()) == false) || node.getId().equals(
-				node.getNext()))) {
+		if (!((msg.getOriginalSource().equals(node.getId()) && msg.getSource().equals(node.getId()) == false) || node
+				.getId().equals(node.getNext()))) {
 			network.sendInChannel(node.getNext(), msg);
 		}
 	}
@@ -152,8 +149,6 @@ public abstract class ANodeState {
 		if (range.inRange(msg.getKey()) == false) {
 			network.sendInChannel(node.getNext(), msg);
 		} else {
-			System.out.println(node.getId() + "route put vers "
-					+ node.getNext());
 			range.add(msg.getKey(), msg.getData());
 		}
 	}
@@ -168,8 +163,7 @@ public abstract class ANodeState {
 
 		msg.incTtl();
 
-		if (node.getNextShortcut() != null
-				&& node.getNextShortcut().equals(msg.getOriginalSource()))
+		if (node.getNextShortcut() != null && node.getNextShortcut().equals(msg.getOriginalSource()))
 			node.setNextShortcut(msg.getNext());
 
 		// Je suis suivant du suivant du noeud qui se déconnecte

@@ -1,45 +1,46 @@
 args.length  6
-false Le noeud : "2000" envoie un message "MessageAskConnection" a "1000"
-noeud : "2000" msg: "MessageConnectTo" de "1000" envoyé par "1000" shortcut: null prev : null next : 1000
-true Le noeud : "2000" envoie un message "MessageConnect" a "1000"
-true Le noeud : "2000" envoie un message "MessageEventConnect" a "1000"
-noeud : "2000" msg: "MessageEndRange" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-noeud : "2000" msg: "MessageEventConnect" de "1000" envoyé par "2000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
-noeud : "2000" msg: "MessagePing" de "1000" envoyé par "1000" shortcut: null prev : id: 1000 adress: ari-31-312-01/132.227.114.193:1515 next : 1000
-true Le noeud : "2000" envoie un message "MessagePing" a "1000"
+ConnectTo de 1000 par 1000
+EndRange de 1000 par 1000
+EventConnect de 1000 par 2000
+AskConnection de 1000 par 4000
+EventConnect de 1000 par 4000
+AskConnection de 1000 par 3000
+EventConnect de 1000 par 3000
+AskConnection de 1000 par 6000
+EventConnect de 1000 par 6000
+AskConnection de 1000 par 7000
+EventConnect de 1000 par 7000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+Put de 1000 par 1000
+
+id: 2000 next: 3000 prev: 1000 short 4000 status: Connected
+range[2000:2999| data: {2000=20000}]
+
+1000 demande la donnée de clé 10
+1000 demande la donnée de clé 42
+AskConnection de 1000 par 8888
+1000 demande la donnée de clé 666
+EventConnect de 1000 par 8888
+1000 demande la donnée de clé 85300
+1000 demande la donnée de clé 2000
+1000 demande la donnée de clé 5001
+1000 demande la donnée de clé 3000
+1000 demande la donnée de clé 3001
+1000 demande la donnée de clé 3999
+
+id: 2000 next: 3000 prev: 1000 short 4000 status: Connected
+range[2000:2999| data: {2000=20000}]
+
+Connect de 1500 par 1500
+EventConnect de 1500 par 1500
+
+id: 2000 next: 3000 prev: 1500 short 4000 status: Connected
+range[2000:2999| data: {2000=20000}]
+
