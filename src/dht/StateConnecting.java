@@ -6,7 +6,6 @@ import java.util.concurrent.BlockingQueue;
 import dht.message.AMessage;
 import dht.message.MessageAskConnection;
 import dht.message.MessageConnectTo;
-import dht.message.MessageEventConnect;
 
 /**
  * Etat du noeud qui est entrain de rejoindre l'anneau.

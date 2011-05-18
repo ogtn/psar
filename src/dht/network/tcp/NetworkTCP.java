@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -40,6 +41,7 @@ class NetworkTCP implements INetwork {
 	private Selector selector;
 	private TCPId nextId;
 	private SocketChannel nextChannel;
+	private InetAddress localhost;
 
 	/**
 	 * Connexions en attente
@@ -69,14 +71,15 @@ class NetworkTCP implements INetwork {
 		ServerSocketChannel ssChan = null;
 
 		try {
+			localhost = InetAddress.getLocalHost();
+
 			selector = Selector.open();
 
 			if (node == null)
 				throw new IllegalStateException("node is null");
 
 			if (this.node != null)
-				throw new IllegalStateException(
-						"init method was already called");
+				throw new IllegalStateException("init method was already called");
 
 			// Création de notre socket serveur
 			ssChan = ServerSocketChannel.open();
@@ -86,8 +89,7 @@ class NetworkTCP implements INetwork {
 			ssChan.socket().setReuseAddress(true);
 			// Acquisition de l'adresse socket
 			ssChan.socket().bind(
-					new InetSocketAddress("0.0.0.0", narrowToNetworkId(
-							node.getId()).getAddress().getPort()));
+					new InetSocketAddress("0.0.0.0", narrowToNetworkId(node.getId()).getAddress().getPort()));
 			/*
 			 * ssChan.socket().bind( new InetSocketAddress("0.0.0.0",
 			 * narrowToNetworkId( node.getId()).getAddress().getPort()));
@@ -112,8 +114,7 @@ class NetworkTCP implements INetwork {
 	 * @throws IOException
 	 *             Une exception est lancée si l'écriture échoue.
 	 */
-	private void writeObject(SocketChannel socketChannel, Serializable object)
-			throws IOException {
+	private void writeObject(SocketChannel socketChannel, Serializable object) throws IOException {
 
 		ObjectOutputStream oos = null;
 		ByteArrayOutputStream bos = null;
@@ -161,8 +162,8 @@ class NetworkTCP implements INetwork {
 	 *             casté.
 	 */
 	@SuppressWarnings("unchecked")
-	private <T extends Serializable> T readObject(SocketChannel socketChannel)
-			throws IOException, ClassNotFoundException {
+	private <T extends Serializable> T readObject(SocketChannel socketChannel) throws IOException,
+			ClassNotFoundException {
 
 		ByteBuffer bufferSize = null, bufferObject = null;
 		int objectSize = 0;
@@ -213,8 +214,7 @@ class NetworkTCP implements INetwork {
 	}
 
 	// TODO
-	private <T extends Serializable> T nonBlockingReadObject(
-			SocketChannel socketChannel) throws IOException,
+	private <T extends Serializable> T nonBlockingReadObject(SocketChannel socketChannel) throws IOException,
 			ClassNotFoundException {
 
 		ByteBuffer bufferSize = null, bufferObject = null;
@@ -279,8 +279,7 @@ class NetworkTCP implements INetwork {
 	 *             Une exception est lancée si la convertion est impossible car
 	 *             l'identifiant passé en paramètre est du mauvais type.
 	 */
-	private static TCPId narrowToNetworkId(ANodeId id)
-			throws BadNodeIdException {
+	private static TCPId narrowToNetworkId(ANodeId id) throws BadNodeIdException {
 		if (id instanceof TCPId)
 			return (TCPId) id;
 		else
@@ -301,9 +300,13 @@ class NetworkTCP implements INetwork {
 		message.setSource(node.getId());
 
 		try {
-			next = SocketChannel.open(tcpId.getAddress());
-			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL,
-					message));
+			// Adresse de destination = adresse de mon interface
+			if (localhost.getHostAddress().equals(tcpId.getAddress().getAddress().getHostAddress()))
+				next = SocketChannel.open(new InetSocketAddress("127.0.0.1", tcpId.getAddress().getPort()));
+			else
+				next = SocketChannel.open(tcpId.getAddress());
+
+			writeObject(next, new NetworkMessage(Type.MESSAGE_OUT_CHANNEL, message));
 			fireSendMessage(message, id, false);
 		} catch (IOException e) {
 			throw new NetworkException(e);
@@ -316,8 +319,7 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void openChannel(ANodeId id) throws NetworkException,
-			BadNodeIdException {
+	public void openChannel(ANodeId id) throws NetworkException, BadNodeIdException {
 
 		try {
 			TCPId tcpId = narrowToNetworkId(id);
@@ -328,13 +330,19 @@ class NetworkTCP implements INetwork {
 
 			nextChannel.socket().setReuseAddress(true);
 
-			nextChannel.socket().connect(tcpId.getAddress(), NETWORK_TIMEOUT);
+			// TODO ss veriables
+			
+			// Adresse de destination = adresse de mon interface
+			if (localhost.getHostAddress().equals(tcpId.getAddress().getAddress().getHostAddress()))
+				nextChannel.socket().connect(new InetSocketAddress("127.0.0.1", tcpId.getAddress().getPort()),
+						NETWORK_TIMEOUT);
+			else
+				nextChannel.socket().connect(tcpId.getAddress(), NETWORK_TIMEOUT);
 
 			nextChannel.configureBlocking(false);
 
 			nextId = tcpId;
-			writeObject(nextChannel,
-					new NetworkMessage(Type.OPEN_CHANNEL, null));
+			writeObject(nextChannel, new NetworkMessage(Type.OPEN_CHANNEL, null));
 		} catch (IOException e) {
 			Tools.close(nextChannel);
 			nextChannel = null;
@@ -347,15 +355,13 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void closeChannel(ANodeId id) throws ChannelNotFoundException,
-			NetworkException {
+	public void closeChannel(ANodeId id) throws ChannelNotFoundException, NetworkException {
 
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
 		try {
-			writeObject(nextChannel, new NetworkMessage(Type.CLOSE_CHANNEL,
-					null));
+			writeObject(nextChannel, new NetworkMessage(Type.CLOSE_CHANNEL, null));
 		} catch (IOException e) {
 			throw new NetworkException(e);
 		} finally {
@@ -369,8 +375,7 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendInChannel(ANodeId id, AMessage message)
-			throws ChannelNotFoundException, NetworkException,
+	public void sendInChannel(ANodeId id, AMessage message) throws ChannelNotFoundException, NetworkException,
 			ChannelCloseException {
 
 		if (nextId == null || nextId.equals(id) == false)
@@ -379,15 +384,13 @@ class NetworkTCP implements INetwork {
 		message.setSource(node.getId());
 
 		try {
-			writeObject(nextChannel, new NetworkMessage(
-					Type.MESSAGE_IN_CHANNEL, message));
+			writeObject(nextChannel, new NetworkMessage(Type.MESSAGE_IN_CHANNEL, message));
 			fireSendMessage(message, id, true);
 
 			try {
 				Thread.sleep(NETWORK_TIMEOUT);
 
-				NetworkMessage netMsg = this
-						.<NetworkMessage> nonBlockingReadObject(nextChannel);
+				NetworkMessage netMsg = this.<NetworkMessage> nonBlockingReadObject(nextChannel);
 
 				if (netMsg == null)
 					throw new ChannelCloseException(nextId);
@@ -404,8 +407,7 @@ class NetworkTCP implements INetwork {
 				nextChannel = null;
 				nextId = null;
 				openChannel(node.getNextShortcut());
-				sendInChannel(id,
-						new MessageFault(node.getId(), node.getNextRange()));
+				sendInChannel(id, new MessageFault(node.getId(), node.getNextRange()));
 				sendInChannel(id, message);
 			} else
 				throw new ChannelCloseException(nextId);
@@ -494,13 +496,11 @@ class NetworkTCP implements INetwork {
 
 						// On a une connexion en attente
 						if (pendingConnections.size() > 0) {
-							pendingConnections.remove().register(selector,
-									SelectionKey.OP_READ);
+							pendingConnections.remove().register(selector, SelectionKey.OP_READ);
 						}
 					} else if (netMsg.getType() == Type.MESSAGE_IN_CHANNEL) {
 						msg = netMsg.getContent();
-						writeObject(sc, new NetworkMessage(Type.MESSAGE_ACK,
-								null));
+						writeObject(sc, new NetworkMessage(Type.MESSAGE_ACK, null));
 					} else {
 						throw new IllegalStateException("Unknown type");
 					}
@@ -559,8 +559,7 @@ class NetworkTCP implements INetwork {
 	 * @param message
 	 *            Les messages envoyés.
 	 */
-	private void fireSendMessage(AMessage message, ANodeId id,
-			boolean isInChannel) {
+	private void fireSendMessage(AMessage message, ANodeId id, boolean isInChannel) {
 		for (INetworkListener listener : listeners) {
 			try {
 				listener.sendMessage(message, node, id, isInChannel);

@@ -160,8 +160,7 @@ public class Node implements INode, Runnable {
 			} else if (msg instanceof MessageEventDisconnect) {
 				state.process((MessageEventDisconnect) msg);
 			} else
-				System.err.println("Kernel panic dans "
-						+ this.getClass().getName() + " pr msg : '" + msg
+				System.err.println("Kernel panic dans " + this.getClass().getName() + " pr msg : '" + msg
 						+ "' node : [" + this + "]");
 		}
 	}
@@ -173,6 +172,9 @@ public class Node implements INode, Runnable {
 
 	@Override
 	public void put(UInt key, Object data) {
+		// TODO on pourrait le mettre ds la queue il faudrait alors verifier le
+		// code du routage
+		// same pr les autres methodes
 		inetwork.sendTo(id, new MessagePut(id, data, key));
 	}
 
@@ -281,7 +283,20 @@ public class Node implements INode, Runnable {
 
 	@Override
 	public String toString() {
-		return "id : '" + id + "' next '" + next + "' previous '" + previous
-				+ "' status: '" + state.getClass().getName() + "' " + range;
+
+		String buff = "";
+		String shortcutStr = nextShortcut != null ? String.valueOf(nextShortcut.getNumericID()) : null;
+		String prevStr = previous != null ? String.valueOf(previous.getNumericID()) : null;
+		String nextStr = next != null ? String.valueOf(next.getNumericID()) : null;
+		String statusStr = state.getClass().getName();
+		statusStr = statusStr.substring("dht.State".length(), statusStr.length());
+
+		buff += "id: " + id.getNumericID() + " next: " + nextStr + " prev: " + prevStr;
+		buff += " short " + shortcutStr + " status: " + statusStr;
+		buff += "\n" + range;
+
+		// TODO builder
+
+		return buff;
 	}
 }
