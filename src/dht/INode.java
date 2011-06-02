@@ -21,6 +21,8 @@ public interface INode {
 	UInt getNextRange();
 	
 	Object get(UInt key);
+	
+	void errorNext();
 
 	// TODO virer cette meth inutiles
 	ANodeState getState();

@@ -319,8 +319,7 @@ class NetworkTCP implements INetwork {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void openChannel(ANodeId id) throws NetworkException, BadNodeIdException {
-
+	public void openChannel(ANodeId id) throws NetworkException, BadNodeIdException {		
 		try {
 			TCPId tcpId = narrowToNetworkId(id);
 
@@ -376,8 +375,7 @@ class NetworkTCP implements INetwork {
 	 */
 	@Override
 	public void sendInChannel(ANodeId id, AMessage message) throws ChannelNotFoundException, NetworkException,
-			ChannelCloseException {
-
+			ChannelCloseException {		
 		if (nextId == null || nextId.equals(id) == false)
 			throw new ChannelNotFoundException(node, id);
 
@@ -385,7 +383,6 @@ class NetworkTCP implements INetwork {
 
 		try {
 			writeObject(nextChannel, new NetworkMessage(Type.MESSAGE_IN_CHANNEL, message));
-			fireSendMessage(message, id, true);
 
 			try {
 				Thread.sleep(NETWORK_TIMEOUT);
@@ -400,26 +397,32 @@ class NetworkTCP implements INetwork {
 			} catch (InterruptedException e) {
 				throw new NetworkException(e);
 			}
-
+			
 		} catch (IOException e) {
 
 			if (node.getNextShortcut() != null) {
 				nextChannel = null;
 				nextId = null;
 				openChannel(node.getNextShortcut());
-				sendInChannel(id, new MessageFault(node.getId(), node.getNextRange()));
-				sendInChannel(id, message);
+				node.errorNext();
+				sendInChannel(nextId, new MessageFault(node.getId(), node.getNextRange()));
+				sendInChannel(nextId, message);
 			} else
 				throw new ChannelCloseException(nextId);
 
 		} catch (ChannelCloseException e) {
 			nextChannel = null;
 			if (node.getNextShortcut() != null) {
+				System.out.println("ERREUR: ouverture du canal vers " + node.getNextShortcut().getNumericID());
 				openChannel(node.getNextShortcut());
-				sendInChannel(id, message);
+				node.errorNext();
+				sendInChannel(nextId, new MessageFault(node.getId(), node.getNextRange()));
+				sendInChannel(nextId, message);
 			} else
 				throw e;
 		}
+		
+		fireSendMessage(message, id, true);
 	}
 
 	/**
@@ -470,6 +473,8 @@ class NetworkTCP implements INetwork {
 						 * serveur courante et une seule connecxion entrante.
 						 */
 						if (selector.keys().size() == 2) {
+							
+							System.out.println("IOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\nIOUUUUUUUUUUUUUUUUUUUUUUUUUUUU\n");
 							// Quand une connexion arrive, avant d'avoir recu le
 							// message de deconnexion de la précédente on la
 							// met en attente
@@ -496,6 +501,8 @@ class NetworkTCP implements INetwork {
 
 						// On a une connexion en attente
 						if (pendingConnections.size() > 0) {
+							
+							System.out.println("YAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nYAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
 							pendingConnections.remove().register(selector, SelectionKey.OP_READ);
 						}
 					} else if (netMsg.getType() == Type.MESSAGE_IN_CHANNEL) {
