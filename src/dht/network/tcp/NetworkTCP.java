@@ -562,7 +562,7 @@ class NetworkTCP implements INetwork {
 	private void fireSendMessage(AMessage message, ANodeId id, boolean isInChannel) {
 		for (INetworkListener listener : listeners) {
 			try {
-				listener.sendMessage(message, node, id, isInChannel);
+				listener.eventSendMessage(message, node, id, isInChannel);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -578,7 +578,7 @@ class NetworkTCP implements INetwork {
 	private void fireRecvMessage(AMessage message) {
 		for (INetworkListener listener : listeners) {
 			try {
-				listener.recvMessage(message, node);
+				listener.eventRecvMessage(message, node);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

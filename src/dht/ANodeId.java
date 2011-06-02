@@ -42,12 +42,20 @@ public abstract class ANodeId implements Serializable {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public int hashCode() {
 		return id.hashCode();
-	}	
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return id.toString();
+	}
 }

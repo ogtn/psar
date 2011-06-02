@@ -263,7 +263,7 @@ public class Node implements INode, Runnable {
 	private void fireChangeSate(ANodeState oldState, ANodeState newState) {
 		for (INodeListener listener : listeners) {
 			try {
-				listener.changeState(this, oldState, newState);
+				listener.eventChangeState(this, oldState, newState);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
