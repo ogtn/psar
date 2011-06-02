@@ -1,7 +1,5 @@
 package dht.network.tcp;
 
-import com.sun.xml.internal.ws.api.message.Message;
-
 import dht.ANodeId;
 import dht.INetworkListener;
 import dht.INode;
@@ -19,7 +17,7 @@ public class PrintNetworkListener implements INetworkListener {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendMessage(AMessage message, INode node, ANodeId id, boolean isInChannel) {
+	public void eventSendMessage(AMessage message, INode node, ANodeId id, boolean isInChannel) {
 
 		/*System.out.println(isInChannel + " Le noeud : \"" + node.getId().getNumericID() + "\" envoie un message \""
 				+ message.getClass().getSimpleName() + "\" a \"" + id.getNumericID() + "\"");*/
@@ -29,7 +27,7 @@ public class PrintNetworkListener implements INetworkListener {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void recvMessage(AMessage message, INode node) {
+	public void eventRecvMessage(AMessage message, INode node) {
 
 		String msgStr = message.getClass().getSimpleName();
 		msgStr = msgStr.substring("Message".length(), msgStr.length());

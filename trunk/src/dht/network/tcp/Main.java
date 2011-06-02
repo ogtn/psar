@@ -24,6 +24,7 @@ class Main {
 			Node node = null;
 			NetworkTCP netTcp = new NetworkTCP();
 			netTcp.addNetworkListener(netList);
+			netTcp.addNetworkListener(new FileNetworkListener());
 			if (connectId != null) {
 				node = new Node(netTcp, netId, connectId);
 				node.addINodeListener(nodeList);
@@ -668,14 +669,14 @@ class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			contigue(10);
+			//contigue(10);
 			
 			//contigue(3);
 
 			// random(10);
 
 			//randomDeco(10);
-			// cokeAndPut(5);
+			cokeAndPut(5);
 			// getMeIMFamous(10);
 			// leaveMyAss(2); TODO pq ce marche?
 			// leaveMyAss(5);
