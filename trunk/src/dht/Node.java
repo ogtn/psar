@@ -17,6 +17,7 @@ import dht.message.MessageDataRange;
 import dht.message.MessageEndRange;
 import dht.message.MessageEventConnect;
 import dht.message.MessageEventDisconnect;
+import dht.message.MessageFault;
 import dht.message.MessageGet;
 import dht.message.MessageLeave;
 import dht.message.MessagePing;
@@ -159,6 +160,8 @@ public class Node implements INode, Runnable {
 				state.process((MessageEventConnect) msg);
 			} else if (msg instanceof MessageEventDisconnect) {
 				state.process((MessageEventDisconnect) msg);
+			} else if (msg instanceof MessageFault) {
+				state.process((MessageFault) msg);
 			} else
 				System.err.println("Kernel panic dans " + this.getClass().getName() + " pr msg : '" + msg
 						+ "' node : [" + this + "]");
@@ -298,5 +301,13 @@ public class Node implements INode, Runnable {
 		// TODO builder
 
 		return buff;
+	}
+	
+	
+	@Override
+	public void errorNext()
+	{
+		next = nextShortcut;
+		nextShortcut = null;
 	}
 }
