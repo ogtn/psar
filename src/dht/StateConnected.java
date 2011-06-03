@@ -1,6 +1,9 @@
 package dht;
 
+import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Queue;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
 import dht.message.AMessage;
@@ -122,5 +125,18 @@ public class StateConnected extends ANodeState {
 	void process(MessageFault msg) {
 		node.setPrevious(msg.getOriginalSource());
 		range.setBegin(msg.getNewBeginRange());
+		
+		Iterator<Entry<UInt, Serializable>> iter = node.getBackup().entrySet().iterator();
+		
+		while(iter.hasNext())
+		{
+			Entry<UInt, Serializable> entry = iter.next();
+			
+			if(range.inRange(entry.getKey()))
+			{
+				range.add(entry.getKey(), entry.getValue());
+				iter.remove();
+			}
+		}		
 	}
 }

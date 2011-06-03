@@ -35,7 +35,7 @@ import dht.tools.Tools;
  */
 class NetworkTCP implements INetwork {
 
-	private static final int NETWORK_TIMEOUT = 100;
+	private static final int NETWORK_TIMEOUT = 200;
 
 	private INode node;
 	private Selector selector;

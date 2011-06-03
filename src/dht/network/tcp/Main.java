@@ -1,12 +1,13 @@
 package dht.network.tcp;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import dht.Node;
 import dht.UInt;
@@ -25,6 +26,7 @@ class Main {
 			NetworkTCP netTcp = new NetworkTCP();
 			netTcp.addNetworkListener(netList);
 			netTcp.addNetworkListener(new FileNetworkListener());
+			netTcp.addNetworkListener(new GraphvizNetworkListener());
 			if (connectId != null) {
 				node = new Node(netTcp, netId, connectId);
 				node.addINodeListener(nodeList);
@@ -112,7 +114,7 @@ class Main {
 		}
 
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -274,7 +276,7 @@ class Main {
 
 	private static void cokeAndPut(final int n) {
 
-		Map<UInt, Object> data = new HashMap<UInt, Object>();
+		Map<UInt, Serializable> data = new HashMap<UInt, Serializable>();
 		Random generator = new Random();
 		List<TCPId> ids = new LinkedList<TCPId>();
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
@@ -315,7 +317,7 @@ class Main {
 			e.printStackTrace();
 		}
 
-		for (Entry<UInt, Object> entry : data.entrySet()) {
+		for (Entry<UInt, Serializable> entry : data.entrySet()) {
 			nodes.get(0).put(entry.getKey(), entry.getValue());
 		}
 
@@ -357,7 +359,7 @@ class Main {
 		data.put(new UInt(8000L), "8000");
 		data.put(new UInt(4000L), "4000");
 
-		for (Entry<UInt, Object> entry : data.entrySet()) {
+		for (Entry<UInt, Serializable> entry : data.entrySet()) {
 			nodes.get(0).put(entry.getKey(), entry.getValue());
 		}
 
@@ -382,7 +384,7 @@ class Main {
 
 	private static void getMeIMFamous(final int n) {
 
-		Map<UInt, Object> data = new HashMap<UInt, Object>();
+		Map<UInt, Serializable> data = new HashMap<UInt, Serializable>();
 		Random generator = new Random();
 		List<TCPId> ids = new LinkedList<TCPId>();
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
@@ -425,7 +427,7 @@ class Main {
 					e.printStackTrace();
 				}
 
-				for (Entry<UInt, Object> entry : data.entrySet()) {
+				for (Entry<UInt, Serializable> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
@@ -485,7 +487,7 @@ class Main {
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
-		Map<UInt, Object> data = new HashMap<UInt, Object>();
+		Map<UInt, Serializable> data = new HashMap<UInt, Serializable>();
 
 		data.put(new UInt(1000L), "1000");
 		data.put(new UInt(2763L), "2763");
@@ -523,7 +525,7 @@ class Main {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				for (Entry<UInt, Object> entry : data.entrySet()) {
+				for (Entry<UInt, Serializable> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
@@ -584,7 +586,7 @@ class Main {
 		Map<UInt, TCPId> connectedNodes = new HashMap<UInt, TCPId>();
 		List<Thread> threads = new LinkedList<Thread>();
 		List<Node> nodes = new LinkedList<Node>();
-		Map<UInt, Object> data = new HashMap<UInt, Object>();
+		Map<UInt, Serializable> data = new HashMap<UInt, Serializable>();
 
 		data.put(new UInt(1000L), "1000");
 		data.put(new UInt(2763L), "2763");
@@ -622,7 +624,7 @@ class Main {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				for (Entry<UInt, Object> entry : data.entrySet()) {
+				for (Entry<UInt, Serializable> entry : data.entrySet()) {
 					nodes.get(0).put(entry.getKey(), entry.getValue());
 				}
 			}
@@ -669,11 +671,11 @@ class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			contigue(10);
+			//contigue(10);
 			
 			//contigue(3);
 
-			// random(10);
+			random(10);
 
 			//randomDeco(10);
 			//cokeAndPut(5);

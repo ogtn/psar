@@ -61,6 +61,8 @@ public class MainConsole {
 			TCPId netId = new TCPId(new UInt(uid), address);
 
 			netTcp.addNetworkListener(new PrintNetworkListener());
+			netTcp.addNetworkListener(new FileNetworkListener());
+			netTcp.addNetworkListener(new GraphvizNetworkListener());
 
 			Node node;
 
@@ -92,6 +94,7 @@ public class MainConsole {
 			Pattern pingPattern = Pattern.compile("^ping$");
 
 			while (sc.hasNext()) {
+				System.out.println("> ");
 				String line = sc.nextLine();
 
 				Matcher putMatcher = putPattern.matcher(line);
@@ -110,13 +113,17 @@ public class MainConsole {
 				if (leaveMatcher.matches()) {
 					System.out.println("Déconnexion du noeud");
 					node.leave();
+					continue;
 				}
 
 				Matcher pingMatcher = pingPattern.matcher(line);
 				if (pingMatcher.matches()) {
 					System.out.println("ping");
 					node.ping();
+					continue;
 				}
+				
+				System.out.println("Commande invalide");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

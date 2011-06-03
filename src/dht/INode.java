@@ -1,5 +1,7 @@
 package dht;
 
+import java.io.Serializable;
+
 /**
  * Interface représentant un noeud de l'application chargé de stocker une partie
  * des données de la DHT.
@@ -14,7 +16,7 @@ public interface INode {
 	
 	void ping();
 	
-	void put(UInt key, Object data);
+	void put(UInt key, Serializable data);
 	
 	void leave();
 	
@@ -23,6 +25,8 @@ public interface INode {
 	Object get(UInt key);
 	
 	void errorNext();
+	
+	Range getRange();
 
 	// TODO virer cette meth inutiles
 	ANodeState getState();

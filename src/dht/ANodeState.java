@@ -146,11 +146,16 @@ public abstract class ANodeState {
 	}
 
 	void process(MessagePut msg) {
-		if (range.inRange(msg.getKey()) == false) {
-			network.sendInChannel(node.getNext(), msg);
-		} else {
+		if (range.inRange(msg.getKey()))
+		{
 			range.add(msg.getKey(), msg.getData());
+			msg.setForce(true);
+			network.sendInChannel(node.getNext(), msg);
 		}
+		else if(msg.isForce())
+			node.addBackup(msg.getKey(), msg.getData());	
+		else
+			network.sendInChannel(node.getNext(), msg);
 	}
 
 	void process(MessageLeave msg) {
