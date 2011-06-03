@@ -1,8 +1,10 @@
 package dht;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import dht.UInt.MutableUInt;
@@ -11,14 +13,14 @@ public class Range {
 
 	public static class Data {
 		private UInt key;
-		private Object data;
+		private Serializable data;
 
-		public Data(UInt key, Object data) {
+		public Data(UInt key, Serializable data) {
 			this.key = key;
 			this.data = data;
 		}
 
-		public Object getData() {
+		public Serializable getData() {
 			return data;
 		}
 
@@ -28,8 +30,8 @@ public class Range {
 	}
 
 	private final MutableUInt begin, end;
-	private final TreeMap<UInt, Object> data;
-	private final Map<UInt, Object> unmodifiableData;
+	private final SortedMap<UInt, Serializable> data;
+	private final Map<UInt, Serializable> unmodifiableData;
 
 	/**
 	 * Crée et initialise une plage de données vide.
@@ -42,28 +44,29 @@ public class Range {
 		begin = new MutableUInt(null);
 		end = new MutableUInt(null);
 
-		data = new TreeMap<UInt, Object>(new Comparator<UInt>() {
-			@Override
-			public int compare(UInt keyOne, UInt keyTwo) {
+		data = Collections.synchronizedSortedMap(new TreeMap<UInt, Serializable>(
+				new Comparator<UInt>() {
+					@Override
+					public int compare(UInt keyOne, UInt keyTwo) {
 
-				if (isNotEmptyRange() == false)
-					throw new IllegalStateException("Range is empty");
+						if (isNotEmptyRange() == false)
+							throw new IllegalStateException("Range is empty");
 
-				long tmpKeyOne = keyOne.toLong();
-				long tmpKeyTwo = keyTwo.toLong();
+						long tmpKeyOne = keyOne.toLong();
+						long tmpKeyTwo = keyTwo.toLong();
 
-				if (keyOne.equals(keyTwo))
-					return 0;
+						if (keyOne.equals(keyTwo))
+							return 0;
 
-				if (tmpKeyOne >= 0 && tmpKeyOne <= end.toLong())
-					tmpKeyOne = UInt.MAX_KEY + tmpKeyOne;
+						if (tmpKeyOne >= 0 && tmpKeyOne <= end.toLong())
+							tmpKeyOne = UInt.MAX_KEY + tmpKeyOne;
 
-				if (tmpKeyTwo >= 0 && tmpKeyTwo <= end.toLong())
-					tmpKeyTwo = UInt.MAX_KEY + tmpKeyTwo;
+						if (tmpKeyTwo >= 0 && tmpKeyTwo <= end.toLong())
+							tmpKeyTwo = UInt.MAX_KEY + tmpKeyTwo;
 
-				return tmpKeyOne - tmpKeyTwo < 0 ? -1 : 1;
-			}
-		});
+						return tmpKeyOne - tmpKeyTwo < 0 ? -1 : 1;
+					}
+				}));
 
 		unmodifiableData = Collections.unmodifiableMap(data);
 	}
@@ -156,7 +159,7 @@ public class Range {
 	 * @return <code>true</code> si la clé est dans la plage de données,
 	 *         <code>false</code> sinon.
 	 */
-	boolean inRange(UInt key) {
+	synchronized boolean inRange(UInt key) {
 		assert key != null : "nullable key";
 
 		return inRange(begin.getUInt(), end.getUInt(), key);
@@ -170,7 +173,7 @@ public class Range {
 	 * @param data
 	 *            La donnée à ajouter.
 	 */
-	void add(UInt key, Object data) {
+	synchronized void add(UInt key, Serializable data) {
 
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
@@ -190,7 +193,7 @@ public class Range {
 	 * @param data
 	 *            La donnée à ajouter.
 	 */
-	void addExtend(UInt key, Object data) {
+	synchronized void addExtend(UInt key, Serializable data) {
 
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
@@ -209,7 +212,7 @@ public class Range {
 	 * @param data
 	 *            La donnée à ajouter.
 	 */
-	public void insertExtend(UInt key, Object data) {
+	synchronized public void insertExtend(UInt key, Serializable data) {
 
 		assert key != null : "nullable key";
 		assert data != null : "nullable data";
@@ -228,7 +231,7 @@ public class Range {
 	 * @return La donnée recherchée ou <code>null</code> si aucune donnée ne
 	 *         correspond à la clé.
 	 */
-	Object get(UInt key) {
+	synchronized Object get(UInt key) {
 		return data.get(key);
 	}
 
@@ -237,7 +240,7 @@ public class Range {
 	 * 
 	 * @return une vue non modifiable des données.
 	 */
-	Map<UInt, Object> getData() {
+	public synchronized Map<UInt, Serializable> getData() {
 		return unmodifiableData;
 	}
 
@@ -259,13 +262,13 @@ public class Range {
 	 *             Une exception est lancée si on tente de rétrécir la plage
 	 *             alors qu'une donnée est présente dans l'intervalle rétrécit.
 	 */
-	void shrinkEnd(UInt end) throws IndexOutOfBoundsException {
+	synchronized void shrinkEnd(UInt end) throws IndexOutOfBoundsException {
 
 		assert end != null : "nullable key";
 
 		if (data.comparator().compare(end, begin.getUInt()) == 0) {
-			begin.setUInt((Long)null);
-			this.end.setUInt((Long)null);
+			begin.setUInt((Long) null);
+			this.end.setUInt((Long) null);
 		} else {
 			UInt tmpEnd = new UInt((end.toLong() - 1 + UInt.MAX_KEY)
 					% UInt.MAX_KEY);
@@ -304,7 +307,7 @@ public class Range {
 	 *            La clé après laquelle on retire les données plus grandes.
 	 * @return La donnée retirée ou <code>null</code> si il y'en a pas.
 	 */
-	Data shrinkToLast(UInt key) {
+	synchronized Data shrinkToLast(UInt key) {
 
 		assert key != null : "nullable key";
 
@@ -328,7 +331,7 @@ public class Range {
 	 * 
 	 * @return La fin de la plage.
 	 */
-	UInt getEnd() {
+	synchronized public UInt getEnd() {
 		return end.getUInt();
 	}
 
@@ -338,7 +341,7 @@ public class Range {
 	 * @param end
 	 *            La nouvelle fin de la plage.
 	 */
-	void setEnd(UInt end) {
+	synchronized void setEnd(UInt end) {
 
 		assert end != null : "nullable key";
 
@@ -351,7 +354,7 @@ public class Range {
 	 * 
 	 * @return Le nouveau début de la plage.
 	 */
-	UInt getBegin() {
+	synchronized public UInt getBegin() {
 		return begin.getUInt();
 	}
 
@@ -361,7 +364,7 @@ public class Range {
 	 * @param begin
 	 *            Le nouveau début de la plage.
 	 */
-	void setBegin(UInt begin) {
+	synchronized void setBegin(UInt begin) {
 
 		assert begin != null : "nullable key";
 
@@ -373,8 +376,8 @@ public class Range {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String toString() {
+	synchronized public String toString() {
 		return "range[" + begin + ":" + end + "| data: " + data + "]";
-		//return "range[" + begin + ":" + end;
+		// return "range[" + begin + ":" + end;
 	}
 }

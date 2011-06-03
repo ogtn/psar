@@ -1,5 +1,7 @@
 package dht.message;
 
+import java.io.Serializable;
+
 import dht.ANodeId;
 import dht.UInt;
 
@@ -12,7 +14,7 @@ public class MessageData extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 	private UInt key;
-	private Object data;
+	private Serializable data;
 
 	/**
 	 * Crée et initialise une message de transferts de données et de fin de
@@ -26,7 +28,7 @@ public class MessageData extends AMessage {
 	 * @param data
 	 *            La donnée transférée.
 	 */
-	public MessageData(ANodeId originalSource, UInt key, Object data) {
+	public MessageData(ANodeId originalSource, UInt key, Serializable data) {
 		super(originalSource);
 		this.key = key;
 		this.data = data;
@@ -46,7 +48,7 @@ public class MessageData extends AMessage {
 	 * 
 	 * @return La donnée transférée.
 	 */
-	public Object getData() {
+	public Serializable getData() {
 		return data;
 	}
 }

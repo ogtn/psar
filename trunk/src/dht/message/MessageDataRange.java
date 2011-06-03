@@ -1,18 +1,20 @@
 package dht.message;
 
+import java.io.Serializable;
+
 import dht.ANodeId;
 import dht.UInt;
 
 /**
  * Message servant à transmettre une donnée ainsi qu'une fin de plage. Ce
- * message est utilisé lors de l'insertion d'une <code>INode</code> pour la
+ * message est utilObjectObjectisé lors de l'insertion d'une <code>INode</code> pour la
  * transmission des données entre <code>INode</code>.
  */
 public class MessageDataRange extends AMessage {
 
 	private static final long serialVersionUID = 1L;
 	private UInt key;
-	private Object data;
+	private Serializable data;
 	private UInt endRange;
 
 	/**
@@ -29,7 +31,7 @@ public class MessageDataRange extends AMessage {
 	 * @param endRange
 	 *            La nouvelle fin de plage de l'<code>INode</code> récepteur.
 	 */
-	public MessageDataRange(ANodeId originalSource, UInt key, Object data,
+	public MessageDataRange(ANodeId originalSource, UInt key, Serializable data,
 			UInt endRange) {
 		super(originalSource);
 		this.key = key;
@@ -51,7 +53,7 @@ public class MessageDataRange extends AMessage {
 	 * 
 	 * @return La donnée transférée.
 	 */
-	public Object getData() {
+	public Serializable getData() {
 		return data;
 	}
 

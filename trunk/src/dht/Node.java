@@ -1,8 +1,12 @@
 package dht;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -41,6 +45,7 @@ public class Node implements INode, Runnable {
 	// Valeur de retour du get
 	private Object returnGet;
 	private List<INodeListener> listeners;
+	private HashMap<UInt, Serializable> backup;
 
 	/**
 	 * Crée et intialise un noeud déconnecté de tout voisin.
@@ -63,6 +68,7 @@ public class Node implements INode, Runnable {
 		buffer = new LinkedList<AMessage>();
 		state = new StateDisconnected(inetwork, queue, this, range, buffer);
 		listeners = new ArrayList<INodeListener>();
+		backup = new HashMap<UInt, Serializable>();
 	}
 
 	/**
@@ -88,6 +94,7 @@ public class Node implements INode, Runnable {
 		buffer = new LinkedList<AMessage>();
 		state = new StateDisconnected(inetwork, queue, this, range, buffer);
 		listeners = new ArrayList<INodeListener>();
+		backup = new HashMap<UInt, Serializable>();
 	}
 
 	/**
@@ -163,7 +170,8 @@ public class Node implements INode, Runnable {
 			} else if (msg instanceof MessageFault) {
 				state.process((MessageFault) msg);
 			} else
-				System.err.println("Kernel panic dans " + this.getClass().getName() + " pr msg : '" + msg
+				System.err.println("Kernel panic dans "
+						+ this.getClass().getName() + " pr msg : '" + msg
 						+ "' node : [" + this + "]");
 		}
 	}
@@ -174,7 +182,7 @@ public class Node implements INode, Runnable {
 	}
 
 	@Override
-	public void put(UInt key, Object data) {
+	public void put(UInt key, Serializable data) {
 		// TODO on pourrait le mettre ds la queue il faudrait alors verifier le
 		// code du routage
 		// same pr les autres methodes
@@ -207,7 +215,7 @@ public class Node implements INode, Runnable {
 		}
 	}
 
-	Range getRange() {
+	public Range getRange() {
 		return range;
 	}
 
@@ -288,13 +296,18 @@ public class Node implements INode, Runnable {
 	public String toString() {
 
 		String buff = "";
-		String shortcutStr = nextShortcut != null ? String.valueOf(nextShortcut.getNumericID()) : null;
-		String prevStr = previous != null ? String.valueOf(previous.getNumericID()) : null;
-		String nextStr = next != null ? String.valueOf(next.getNumericID()) : null;
+		String shortcutStr = nextShortcut != null ? String.valueOf(nextShortcut
+				.getNumericID()) : null;
+		String prevStr = previous != null ? String.valueOf(previous
+				.getNumericID()) : null;
+		String nextStr = next != null ? String.valueOf(next.getNumericID())
+				: null;
 		String statusStr = state.getClass().getName();
-		statusStr = statusStr.substring("dht.State".length(), statusStr.length());
+		statusStr = statusStr.substring("dht.State".length(), statusStr
+				.length());
 
-		buff += "id: " + id.getNumericID() + " next: " + nextStr + " prev: " + prevStr;
+		buff += "id: " + id.getNumericID() + " next: " + nextStr + " prev: "
+				+ prevStr;
 		buff += " short " + shortcutStr + " status: " + statusStr;
 		buff += "\n" + range;
 
@@ -302,12 +315,19 @@ public class Node implements INode, Runnable {
 
 		return buff;
 	}
-	
-	
+
 	@Override
-	public void errorNext()
-	{
+	public void errorNext() {
 		next = nextShortcut;
 		nextShortcut = null;
+	}
+
+	void addBackup(UInt key, Serializable data) {
+		backup.put(key, data);
+	}
+
+	Map<UInt, Serializable> getBackup()
+	{
+		return backup;
 	}
 }

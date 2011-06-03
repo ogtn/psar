@@ -1,5 +1,7 @@
 package dht.message;
 
+import java.io.Serializable;
+
 import dht.ANodeId;
 import dht.UInt;
 
@@ -9,8 +11,9 @@ import dht.UInt;
 public class MessagePut extends AMessage {
 
 	private static final long serialVersionUID = 1L;
-	private Object data;
+	private Serializable data;
 	private UInt key;
+	boolean force;
 
 	/**
 	 * Crée et initialise un message de stockage de donnée.
@@ -23,10 +26,11 @@ public class MessagePut extends AMessage {
 	 * @param key
 	 *            La clé de la donnée à ajouter dans la DHT.
 	 */
-	public MessagePut(ANodeId originalSource, Object data, UInt key) {
+	public MessagePut(ANodeId originalSource, Serializable data, UInt key) {
 		super(originalSource);
 		this.data = data;
 		this.key = key;
+		force = false;
 	}
 
 	/**
@@ -34,7 +38,7 @@ public class MessagePut extends AMessage {
 	 * 
 	 * @return La donnée à ajouter dans la DHT.
 	 */
-	public Object getData() {
+	public Serializable getData() {
 		return data;
 	}
 
@@ -45,5 +49,13 @@ public class MessagePut extends AMessage {
 	 */
 	public UInt getKey() {
 		return key;
+	}
+
+	public void setForce(boolean force) {
+		this.force = force;
+	}
+
+	public boolean isForce() {
+		return force;
 	}
 }
