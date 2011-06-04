@@ -19,7 +19,7 @@ int main(int argc, char **argv)
             if(event.type == SDL_QUIT || event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
                 break;
         
-        if((img2 = SDL_LoadBMP("prout.bmp")) != NULL)
+        if((img2 = SDL_LoadBMP("ring.bmp")) != NULL)
         {
 			if(img != NULL)
 				SDL_FreeSurface(img);
