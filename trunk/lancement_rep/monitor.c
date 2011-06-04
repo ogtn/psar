@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     int i = 0;
     
     SDL_Init(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(1024, 1024, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE);
+    screen = SDL_SetVideoMode(1024, 1024, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
     
     do
     {
